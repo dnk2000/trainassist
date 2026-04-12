@@ -1,0 +1,378 @@
+{
+    "plan_name": "Personal Home Workout Plan",
+    "language": "uk",
+    "user_profile": {
+      "goal_primary": "reduce_belly_fat",
+      "goal_secondary": [
+        "improve_posture",
+        "reduce_thoracic_back_pain",
+        "strengthen_core"
+      ],
+      "context": {
+        "age": 36,
+        "height_cm": 168,
+        "weight_kg": 64,
+        "previous_weight_kg_range": [55, 57],
+        "work_type": "sedentary",
+        "equipment": [
+          "pull_up_bar",
+          "balance_board",
+          "resistance_bands"
+        ],
+        "limitations": [
+          "chronic_upper_back_pain",
+          "pain_in_thoracic_area_when_lifting_heavy",
+          "poor_posture"
+        ]
+      }
+    },
+    "program_rules": {
+      "session_duration_min": 30,
+      "session_duration_max": 40,
+      "weekly_frequency_days": 5,
+      "rest_day": "sunday",
+      "light_activity_day": "saturday",
+      "avoid": [
+        "training_through_sharp_back_pain",
+        "heavy_lifting_with_rounded_back",
+        "high_volume_crunches",
+        "aggressive_spinal_twisting"
+      ],
+      "workday_break_rule": {
+        "frequency": "every_45_to_60_minutes",
+        "routine": [
+          {
+            "exercise": "Squats",
+            "reps": 10
+          },
+          {
+            "exercise": "Band Pull-Apart",
+            "reps": 10
+          },
+          {
+            "exercise": "Chest Stretch",
+            "duration_seconds": 20
+          }
+        ]
+      }
+    },
+    "weekly_schedule": [
+      {
+        "day": "monday",
+        "workout_type": "A"
+      },
+      {
+        "day": "tuesday",
+        "workout_type": "B"
+      },
+      {
+        "day": "wednesday",
+        "workout_type": "A"
+      },
+      {
+        "day": "thursday",
+        "workout_type": "B"
+      },
+      {
+        "day": "friday",
+        "workout_type": "C"
+      },
+      {
+        "day": "saturday",
+        "workout_type": "light_activity"
+      },
+      {
+        "day": "sunday",
+        "workout_type": "rest"
+      }
+    ],
+    "shared_warmup": {
+      "name": "Daily Warm-up",
+      "estimated_duration_min": 5,
+      "exercises": [
+        {
+          "exercise": "Cat-Cow",
+          "sets": 1,
+          "reps": 10
+        },
+        {
+          "exercise": "Thoracic Rotation (Open Book)",
+          "sets": 1,
+          "reps_per_side": 10
+        },
+        {
+          "exercise": "Chest Stretch",
+          "sets": 1,
+          "duration_seconds": 60
+        },
+        {
+          "exercise": "Band Pull-Apart",
+          "sets": 1,
+          "reps": 20
+        }
+      ]
+    },
+    "workouts": {
+      "A": {
+        "name": "Back + Strength",
+        "goal": [
+          "strengthen_back",
+          "improve_posture",
+          "support_fat_loss"
+        ],
+        "estimated_duration_min": 35,
+        "sections": [
+          {
+            "section_name": "warmup",
+            "use_shared_warmup": true
+          },
+          {
+            "section_name": "strength",
+            "format": "circuit",
+            "rounds": 3,
+            "rounds_max": 4,
+            "rest_between_rounds_seconds": 60,
+            "exercises": [
+              {
+                "exercise": "Push-Ups",
+                "reps_min": 10,
+                "reps_max": 15
+              },
+              {
+                "exercise": "Resistance Band Row",
+                "reps_min": 12,
+                "reps_max": 15
+              },
+              {
+                "exercise": "Pull-Ups",
+                "reps_rule": "max_good_form"
+              },
+              {
+                "exercise": "Glute Bridge",
+                "reps_min": 15,
+                "reps_max": 20
+              }
+            ]
+          },
+          {
+            "section_name": "core",
+            "format": "circuit",
+            "rounds": 2,
+            "rounds_max": 3,
+            "rest_between_rounds_seconds": 45,
+            "exercises": [
+              {
+                "exercise": "Plank",
+                "duration_seconds_min": 30,
+                "duration_seconds_max": 45
+              },
+              {
+                "exercise": "Dead Bug",
+                "reps_per_side": 10
+              }
+            ]
+          },
+          {
+            "section_name": "finisher",
+            "format": "interval",
+            "duration_min": 5,
+            "duration_max": 8,
+            "work_seconds": 30,
+            "rest_seconds": 30,
+            "exercise_options": [
+              "Mountain Climbers",
+              "Burpees"
+            ]
+          }
+        ]
+      },
+      "B": {
+        "name": "Core + Stability",
+        "goal": [
+          "improve_core_stability",
+          "improve_scapular_control",
+          "protect_back"
+        ],
+        "estimated_duration_min": 35,
+        "sections": [
+          {
+            "section_name": "warmup",
+            "use_shared_warmup": true
+          },
+          {
+            "section_name": "stability_strength",
+            "format": "circuit",
+            "rounds": 3,
+            "rest_between_rounds_seconds": 60,
+            "exercises": [
+              {
+                "exercise": "Bird Dog",
+                "reps_per_side": 10
+              },
+              {
+                "exercise": "Face Pull",
+                "reps": 15
+              },
+              {
+                "exercise": "Scapular Pull-Ups",
+                "reps_min": 8,
+                "reps_max": 10
+              },
+              {
+                "exercise": "Squats",
+                "reps_min": 15,
+                "reps_max": 20
+              }
+            ]
+          },
+          {
+            "section_name": "core",
+            "format": "circuit",
+            "rounds": 2,
+            "rounds_max": 3,
+            "rest_between_rounds_seconds": 45,
+            "exercises": [
+              {
+                "exercise": "Leg Raises",
+                "reps_min": 10,
+                "reps_max": 15
+              },
+              {
+                "exercise": "Russian Twist",
+                "reps": 20
+              }
+            ]
+          },
+          {
+            "section_name": "finisher",
+            "format": "interval",
+            "duration_min": 5,
+            "duration_max": 8,
+            "work_seconds": 30,
+            "rest_seconds": 30,
+            "exercise_options": [
+              "Mountain Climbers",
+              "Burpees"
+            ]
+          }
+        ]
+      },
+      "C": {
+        "name": "Fat Burn + Light Strength",
+        "goal": [
+          "increase_calorie_burn",
+          "support_waist_reduction",
+          "maintain_basic_strength"
+        ],
+        "estimated_duration_min": 30,
+        "sections": [
+          {
+            "section_name": "warmup",
+            "use_shared_warmup": true
+          },
+          {
+            "section_name": "main_circuit",
+            "format": "circuit",
+            "rounds": 4,
+            "rounds_max": 5,
+            "rest_between_rounds_seconds": 60,
+            "exercises": [
+              {
+                "exercise": "Jump Squats",
+                "reps": 15
+              },
+              {
+                "exercise": "High Knees",
+                "duration_seconds": 30
+              },
+              {
+                "exercise": "Push-Ups",
+                "reps_min": 10,
+                "reps_max": 15
+              },
+              {
+                "exercise": "Plank",
+                "duration_seconds": 30
+              }
+            ]
+          },
+          {
+            "section_name": "optional_finisher",
+            "format": "interval",
+            "duration_min": 5,
+            "work_seconds": 30,
+            "rest_seconds": 30,
+            "exercise_options": [
+              "Mountain Climbers",
+              "High Knees"
+            ]
+          }
+        ]
+      },
+      "light_activity": {
+        "name": "Saturday Activity",
+        "estimated_duration_min": 20,
+        "sections": [
+          {
+            "section_name": "walking",
+            "target_steps_min": 8000,
+            "target_steps_max": 12000
+          },
+          {
+            "section_name": "mobility",
+            "duration_min": 5,
+            "exercises": [
+              {
+                "exercise": "Cat-Cow",
+                "reps": 10
+              },
+              {
+                "exercise": "Thoracic Rotation (Open Book)",
+                "reps_per_side": 10
+              }
+            ]
+          }
+        ]
+      },
+      "rest": {
+        "name": "Sunday Rest",
+        "instructions": [
+          "rest_or_light_walk",
+          "no_intense_training"
+        ]
+      }
+    },
+    "progression_rules": {
+      "weeks_1_2": {
+        "instruction": "start_at_lower_end_of_rep_ranges_and_minimum_rounds"
+      },
+      "weeks_3_4": {
+        "instruction": "increase_to_upper_end_of_rep_ranges_or_add_one_round_if_pain_free"
+      },
+      "pain_rule": {
+        "instruction": "stop_or_reduce_any_exercise_that_causes_sharp_or_radiating_back_pain"
+      }
+    },
+    "posture_focus": {
+      "priority_muscles": [
+        "upper_back",
+        "scapular_stabilizers",
+        "glutes",
+        "deep_core"
+      ],
+      "tight_areas": [
+        "chest",
+        "thoracic_spine"
+      ]
+    },
+    "nutrition_guidance_simple": {
+      "goal": "small_calorie_deficit",
+      "protein_target_g_per_day": "90_to_110",
+      "behavior_rules": [
+        "reduce_sweets",
+        "reduce_alcohol",
+        "avoid_frequent_snacking",
+        "prefer_2_to_3_full_meals"
+      ]
+    }
+  }
