@@ -57,9 +57,6 @@ function ExerciseItem({ exercise, checked, onToggle, onPreview }) {
             {exercise.details ? (
               <p className="mt-1 text-sm text-slate-300">{exercise.details}</p>
             ) : null}
-            <p className="mt-1 text-sm text-slate-400">
-              {hasVideo ? 'Tap to open exercise video' : 'Tap to view exercise details'}
-            </p>
           </div>
         </button>
       </div>
