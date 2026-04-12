@@ -173,3 +173,18 @@ export async function getWorkoutHistory(userId) {
       })),
   }));
 }
+
+export async function deleteWorkoutSession(sessionId) {
+  if (!sessionId) {
+    throw new Error('Missing workout session id.');
+  }
+
+  const { error } = await supabase
+    .from('workout_sessions')
+    .delete()
+    .eq('id', sessionId);
+
+  if (error) {
+    throw error;
+  }
+}

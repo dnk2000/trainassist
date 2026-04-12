@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import HistoryList from '../components/HistoryList';
 import { useAuth } from '../hooks/useAuth';
-import { getWorkoutHistory } from '../services/api';
+import { useToast } from '../hooks/useToast';
+import { deleteWorkoutSession, getWorkoutHistory } from '../services/api';
 
 function HistoryPage() {
   const [history, setHistory] = useState([]);
+  const [deletingSessionId, setDeletingSessionId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   useEffect(() => {
     let active = true;
@@ -38,6 +41,20 @@ function HistoryPage() {
     };
   }, [user.id]);
 
+  async function handleDelete(sessionId) {
+    setDeletingSessionId(sessionId);
+
+    try {
+      await deleteWorkoutSession(sessionId);
+      setHistory((current) => current.filter((session) => session.id !== sessionId));
+      showToast('Workout day removed from history.', 'success');
+    } catch (deleteError) {
+      showToast(deleteError.message, 'error');
+    } finally {
+      setDeletingSessionId(null);
+    }
+  }
+
   return (
     <section>
       <div className="mb-5 rounded-3xl border border-white/10 bg-slate-900/70 p-5">
@@ -60,7 +77,13 @@ function HistoryPage() {
         </div>
       ) : null}
 
-      {!loading && !error ? <HistoryList sessions={history} /> : null}
+      {!loading && !error ? (
+        <HistoryList
+          sessions={history}
+          deletingSessionId={deletingSessionId}
+          onDelete={handleDelete}
+        />
+      ) : null}
     </section>
   );
 }

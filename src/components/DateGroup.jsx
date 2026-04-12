@@ -1,6 +1,15 @@
 import { formatWorkoutDate } from '../utils/date';
 
-function DateGroup({ date, exercises, currentWeight, workoutName, workoutCode }) {
+function DateGroup({
+  sessionId,
+  date,
+  exercises,
+  currentWeight,
+  workoutName,
+  workoutCode,
+  isDeleting,
+  onDelete,
+}) {
   return (
     <section className="rounded-3xl border border-white/10 bg-slate-900/80 p-4 shadow-lg shadow-slate-950/15">
       <div className="flex items-center justify-between gap-4">
@@ -16,9 +25,19 @@ function DateGroup({ date, exercises, currentWeight, workoutName, workoutCode })
             <p className="mt-1 text-sm text-slate-400">Weight: {currentWeight} kg</p>
           ) : null}
         </div>
-        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300">
-          {exercises.length} completed
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300">
+            {exercises.length} completed
+          </span>
+          <button
+            type="button"
+            onClick={() => onDelete(sessionId)}
+            disabled={isDeleting}
+            className="min-h-11 rounded-full border border-rose-400/20 px-4 text-sm font-medium text-rose-200 transition hover:border-rose-300/40 hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:border-white/10 disabled:text-slate-500"
+          >
+            {isDeleting ? 'Removing...' : 'Delete day'}
+          </button>
+        </div>
       </div>
       <ul className="mt-4 space-y-2">
         {exercises.map((exercise) => (
