@@ -1,7 +1,6 @@
 import { formatWorkoutDate } from '../utils/date';
 
 function DateGroup({
-  sessionId,
   date,
   exercises,
   currentWeight,
@@ -31,7 +30,7 @@ function DateGroup({
           </span>
           <button
             type="button"
-            onClick={() => onDelete(sessionId)}
+            onClick={onDelete}
             disabled={isDeleting}
             className="min-h-11 rounded-full border border-rose-400/20 px-4 text-sm font-medium text-rose-200 transition hover:border-rose-300/40 hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:border-white/10 disabled:text-slate-500"
           >

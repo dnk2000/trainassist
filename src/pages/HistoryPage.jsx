@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import ConfirmModal from '../components/ConfirmModal';
 import HistoryList from '../components/HistoryList';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { deleteWorkoutSession, getWorkoutHistory } from '../services/api';
+import { formatWorkoutDate } from '../utils/date';
 
 function HistoryPage() {
   const [history, setHistory] = useState([]);
+  const [pendingDeleteSession, setPendingDeleteSession] = useState(null);
   const [deletingSessionId, setDeletingSessionId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,13 +44,38 @@ function HistoryPage() {
     };
   }, [user.id]);
 
-  async function handleDelete(sessionId) {
+  const summary = useMemo(() => {
+    const totalDays = history.length;
+    const totalCompleted = history.reduce(
+      (sum, session) => sum + (session.exercises?.length ?? 0),
+      0,
+    );
+    const latestSession = history[0] ?? null;
+    const latestWeight =
+      history.find((session) => session.current_weight !== null && session.current_weight !== undefined)
+        ?.current_weight ?? null;
+
+    return {
+      totalDays,
+      totalCompleted,
+      latestSessionDate: latestSession?.workout_date ?? null,
+      latestWeight,
+    };
+  }, [history]);
+
+  async function confirmDelete() {
+    if (!pendingDeleteSession) {
+      return;
+    }
+
+    const sessionId = pendingDeleteSession.id;
     setDeletingSessionId(sessionId);
 
     try {
       await deleteWorkoutSession(sessionId);
       setHistory((current) => current.filter((session) => session.id !== sessionId));
       showToast('Workout day removed from history.', 'success');
+      setPendingDeleteSession(null);
     } catch (deleteError) {
       showToast(deleteError.message, 'error');
     } finally {
@@ -58,10 +86,31 @@ function HistoryPage() {
   return (
     <section>
       <div className="mb-5 rounded-3xl border border-white/10 bg-slate-900/70 p-5">
-        <h2 className="text-lg font-semibold text-white">Workout history</h2>
-        <p className="mt-2 text-sm text-slate-300">
-          Sessions are grouped by date, newest first, so you can quickly review what you completed.
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-300/80">
+          Summary
         </p>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-white/8 bg-slate-800/70 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Saved days</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{summary.totalDays}</p>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-slate-800/70 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Completed items</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{summary.totalCompleted}</p>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-slate-800/70 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Latest weight</p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {summary.latestWeight !== null ? `${summary.latestWeight} kg` : 'No data'}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-slate-800/70 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Last session</p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {summary.latestSessionDate ? formatWorkoutDate(summary.latestSessionDate) : 'No data'}
+            </p>
+          </div>
+        </div>
       </div>
 
       {loading ? (
@@ -81,7 +130,22 @@ function HistoryPage() {
         <HistoryList
           sessions={history}
           deletingSessionId={deletingSessionId}
-          onDelete={handleDelete}
+          onDelete={(session) => setPendingDeleteSession(session)}
+        />
+      ) : null}
+
+      {pendingDeleteSession ? (
+        <ConfirmModal
+          title="Delete this day?"
+          message={`This will permanently remove the workout saved for ${formatWorkoutDate(pendingDeleteSession.workout_date)}.`}
+          confirmLabel="Delete day"
+          isLoading={deletingSessionId === pendingDeleteSession.id}
+          onConfirm={confirmDelete}
+          onCancel={() => {
+            if (!deletingSessionId) {
+              setPendingDeleteSession(null);
+            }
+          }}
         />
       ) : null}
     </section>

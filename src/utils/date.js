@@ -5,11 +5,10 @@ export function getTodayDateString() {
 }
 
 export function formatWorkoutDate(dateString) {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
-    month: 'short',
+    month: 'long',
     day: 'numeric',
-    year: 'numeric',
   }).format(new Date(`${dateString}T00:00:00`));
 }
 

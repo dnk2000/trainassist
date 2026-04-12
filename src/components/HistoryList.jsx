@@ -17,14 +17,13 @@ function HistoryList({ sessions, deletingSessionId, onDelete }) {
       {sessions.map((session) => (
         <DateGroup
           key={session.id}
-          sessionId={session.id}
           date={session.workout_date}
           exercises={session.exercises}
           currentWeight={session.current_weight}
           workoutName={session.workout_name}
           workoutCode={session.workout_code}
           isDeleting={deletingSessionId === session.id}
-          onDelete={onDelete}
+          onDelete={() => onDelete(session)}
         />
       ))}
     </div>
