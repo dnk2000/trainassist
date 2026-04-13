@@ -10,7 +10,7 @@ import {
   saveWorkoutSession,
   uploadWorkoutImages,
 } from '../services/api';
-import { getTodayDateString, humanizeDayName } from '../utils/date';
+import { formatWorkoutDate, getTodayDateString, humanizeDayName } from '../utils/date';
 import {
   attachExerciseLibrary,
   getScheduledWorkoutCode,
@@ -22,6 +22,7 @@ import {
 function HomePage() {
   const [exerciseLibrary, setExerciseLibrary] = useState([]);
   const [checkedIds, setCheckedIds] = useState([]);
+  const [workoutDate, setWorkoutDate] = useState(() => getTodayDateString());
   const [weight, setWeight] = useState('');
   const [comment, setComment] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
@@ -154,14 +155,14 @@ function HomePage() {
       if (imageFiles.length) {
         uploadedImagePaths = await uploadWorkoutImages({
           userId: user.id,
-          workoutDate: getTodayDateString(),
+          workoutDate,
           files: imageFiles,
         });
       }
 
       await saveWorkoutSession({
         userId: user.id,
-        workoutDate: getTodayDateString(),
+        workoutDate,
         items: selectedItems,
         currentWeight: parsedWeight,
         comment: comment.trim() || null,
@@ -171,7 +172,7 @@ function HomePage() {
       });
 
       setImageFiles([]);
-      showToast('Workout saved for today.', 'success');
+      showToast(`Workout saved for ${formatWorkoutDate(workoutDate)}.`, 'success');
     } catch (saveError) {
       showToast(saveError.message, 'error');
     } finally {
@@ -289,6 +290,8 @@ function HomePage() {
           onClick={handleSave}
           selectedCount={selectedCount}
           totalCount={workoutItems.length}
+          workoutDate={workoutDate}
+          onWorkoutDateChange={setWorkoutDate}
           weight={weight}
           onWeightChange={setWeight}
           comment={comment}

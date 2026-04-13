@@ -4,6 +4,8 @@ function SaveButton({
   onClick,
   selectedCount,
   totalCount,
+  workoutDate,
+  onWorkoutDateChange,
   weight,
   onWeightChange,
   comment,
@@ -29,6 +31,15 @@ function SaveButton({
             {allSelected ? 'Clear all' : 'Select all'}
           </button>
         </div>
+        <label className="mb-3 block">
+          <span className="mb-2 block text-sm font-medium text-slate-200">Workout date</span>
+          <input
+            type="date"
+            value={workoutDate}
+            onChange={(event) => onWorkoutDateChange(event.target.value)}
+            className="min-h-12 w-full rounded-[1.4rem] border border-white/10 bg-slate-900/80 px-4 text-base text-white outline-none transition focus:border-sky-400"
+          />
+        </label>
         <label className="mb-3 block">
           <span className="mb-2 block text-sm font-medium text-slate-200">Current weight</span>
           <div className="relative">
