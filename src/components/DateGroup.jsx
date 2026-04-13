@@ -1,19 +1,38 @@
-import { formatWorkoutDate } from '../utils/date';
+import { useState } from 'react';
+import { formatWarsawTime, formatWorkoutDate } from '../utils/date';
 
 function DateGroup({
   date,
+  createdAt,
+  sessionId,
   exercises,
   currentWeight,
+  comment,
+  images,
+  deletingImagePath,
+  onImageOpen,
+  onDeletePhoto,
   workoutName,
   workoutCode,
   isDeleting,
   onDelete,
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <section className="rounded-3xl border border-white/10 bg-slate-900/80 p-4 shadow-lg shadow-slate-950/15">
       <div className="flex items-center justify-between gap-4">
-        <div>
+        <button
+          type="button"
+          onClick={() => setIsOpen((current) => !current)}
+          className="min-h-11 flex-1 text-left"
+        >
           <h3 className="text-lg font-semibold text-white">{formatWorkoutDate(date)}</h3>
+          {createdAt ? (
+            <p className="mt-1 text-sm text-slate-400">
+              Added at {formatWarsawTime(createdAt)} Warsaw
+            </p>
+          ) : null}
           {workoutName ? (
             <p className="mt-1 text-sm text-slate-300">
               {workoutCode ? `${workoutCode} · ` : ''}
@@ -23,11 +42,19 @@ function DateGroup({
           {currentWeight !== null && currentWeight !== undefined ? (
             <p className="mt-1 text-sm text-slate-400">Weight: {currentWeight} kg</p>
           ) : null}
-        </div>
+        </button>
         <div className="flex flex-col items-end gap-2">
           <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300">
             {exercises.length} completed
           </span>
+          <button
+            type="button"
+            onClick={() => setIsOpen((current) => !current)}
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 px-0 text-lg font-medium text-slate-100 transition hover:border-white/20 hover:bg-white/5"
+            aria-label={isOpen ? 'Collapse workout day' : 'Expand workout day'}
+          >
+            {isOpen ? '▴' : '▾'}
+          </button>
           <button
             type="button"
             onClick={onDelete}
@@ -38,17 +65,61 @@ function DateGroup({
           </button>
         </div>
       </div>
-      <ul className="mt-4 space-y-2">
-        {exercises.map((exercise) => (
-          <li
-            key={`${date}-${exercise.id}`}
-            className="rounded-2xl border border-white/6 bg-slate-800/70 px-4 py-3 text-sm text-slate-100"
-          >
-            <p>{exercise.title}</p>
-            {exercise.details ? <p className="mt-1 text-xs text-slate-400">{exercise.details}</p> : null}
-          </li>
-        ))}
-      </ul>
+      {isOpen ? (
+        <>
+          {comment ? <p className="mt-4 text-sm text-slate-300">{comment}</p> : null}
+          {images?.length ? (
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {images.map((image, index) => (
+                <div
+                  key={image.path}
+                  className="relative overflow-hidden rounded-2xl border border-white/10"
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onImageOpen({
+                        imageUrl: image.url,
+                        imagePath: image.path,
+                        title: `${formatWorkoutDate(date)} · Photo ${index + 1}`,
+                      })
+                    }
+                    className="block w-full"
+                  >
+                    <img
+                      src={image.url}
+                      alt={`Workout from ${formatWorkoutDate(date)} photo ${index + 1}`}
+                      className="aspect-[3/4] w-full object-cover"
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDeletePhoto({ sessionId, imagePath: image.path })}
+                    disabled={deletingImagePath === image.path}
+                    className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/75 text-lg text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:bg-slate-900/50 disabled:text-slate-500"
+                    aria-label={`Delete photo ${index + 1}`}
+                  >
+                    {deletingImagePath === image.path ? '…' : '×'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <ul className="mt-4 space-y-2">
+            {exercises.map((exercise) => (
+              <li
+                key={`${date}-${exercise.id}`}
+                className="rounded-2xl border border-white/6 bg-slate-800/70 px-4 py-3 text-sm text-slate-100"
+              >
+                <p>{exercise.title}</p>
+                {exercise.details ? (
+                  <p className="mt-1 text-xs text-slate-400">{exercise.details}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
     </section>
   );
 }

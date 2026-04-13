@@ -20,10 +20,7 @@ function AppShell() {
   }
 
   return (
-    <div
-      className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pt-4 sm:px-6"
-      style={{ paddingBottom: 'calc(var(--sticky-save-height, 0px) + 1.75rem)' }}
-    >
+    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pt-4 sm:px-6">
       <header className="glass-panel mb-5 rounded-3xl border border-white/10 px-4 py-4 shadow-lg shadow-slate-950/20">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">

@@ -4,7 +4,12 @@ import VideoModal from '../components/VideoModal';
 import WorkoutSection from '../components/WorkoutSection';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { getExerciseLibrary, getLatestSavedWeight, saveWorkoutSession } from '../services/api';
+import {
+  getExerciseLibrary,
+  getLatestSavedWeight,
+  saveWorkoutSession,
+  uploadWorkoutImages,
+} from '../services/api';
 import { getTodayDateString, humanizeDayName } from '../utils/date';
 import {
   attachExerciseLibrary,
@@ -18,6 +23,9 @@ function HomePage() {
   const [exerciseLibrary, setExerciseLibrary] = useState([]);
   const [checkedIds, setCheckedIds] = useState([]);
   const [weight, setWeight] = useState('');
+  const [comment, setComment] = useState('');
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [selectedWorkoutCode, setSelectedWorkoutCode] = useState(() => getScheduledWorkoutCode());
   const [loading, setLoading] = useState(true);
@@ -61,6 +69,20 @@ function HomePage() {
     };
   }, [user.id]);
 
+  useEffect(() => {
+    if (!imageFiles.length) {
+      setImagePreviewUrls([]);
+      return undefined;
+    }
+
+    const objectUrls = imageFiles.map((file) => URL.createObjectURL(file));
+    setImagePreviewUrls(objectUrls);
+
+    return () => {
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imageFiles]);
+
   const trainingPlan = getTrainingPlan();
   const workoutTabs = useMemo(() => getWorkoutTabs(), []);
   const scheduledWorkoutCode = useMemo(() => getScheduledWorkoutCode(), []);
@@ -75,6 +97,7 @@ function HomePage() {
     [workout],
   );
   const selectedCount = checkedIds.length;
+  const allSelected = workoutItems.length > 0 && checkedIds.length === workoutItems.length;
 
   function handleToggle(itemId) {
     setCheckedIds((current) =>
@@ -82,10 +105,37 @@ function HomePage() {
     );
   }
 
+  function handleToggleAll() {
+    if (allSelected) {
+      setCheckedIds([]);
+      return;
+    }
+
+    setCheckedIds(workoutItems.map((item) => item.id));
+  }
+
   function handleWorkoutTabChange(workoutCode) {
     setSelectedWorkoutCode(workoutCode);
     setCheckedIds([]);
     setSelectedExercise(null);
+  }
+
+  function handleImageChange(event) {
+    const nextFiles = Array.from(event.target.files ?? []);
+    if (!nextFiles.length) {
+      return;
+    }
+
+    setImageFiles((current) => {
+      const combinedFiles = [...current, ...nextFiles].slice(0, 3);
+
+      if (current.length + nextFiles.length > 3) {
+        showToast('You can add up to 3 photos per workout.', 'error');
+      }
+
+      return combinedFiles;
+    });
+    event.target.value = '';
   }
 
   async function handleSave() {
@@ -99,16 +149,28 @@ function HomePage() {
       }
 
       const selectedItems = workoutItems.filter((item) => selectedSet.has(item.id));
+      let uploadedImagePaths;
+
+      if (imageFiles.length) {
+        uploadedImagePaths = await uploadWorkoutImages({
+          userId: user.id,
+          workoutDate: getTodayDateString(),
+          files: imageFiles,
+        });
+      }
 
       await saveWorkoutSession({
         userId: user.id,
         workoutDate: getTodayDateString(),
         items: selectedItems,
         currentWeight: parsedWeight,
+        comment: comment.trim() || null,
+        imagePaths: uploadedImagePaths,
         workoutCode: workout?.workoutCode ?? null,
         workoutName: workout?.workoutName ?? null,
       });
 
+      setImageFiles([]);
       showToast('Workout saved for today.', 'success');
     } catch (saveError) {
       showToast(saveError.message, 'error');
@@ -226,8 +288,18 @@ function HomePage() {
           isLoading={saving}
           onClick={handleSave}
           selectedCount={selectedCount}
+          totalCount={workoutItems.length}
           weight={weight}
           onWeightChange={setWeight}
+          comment={comment}
+          onCommentChange={setComment}
+          onToggleAll={handleToggleAll}
+          allSelected={allSelected}
+          imagePreviewUrls={imagePreviewUrls}
+          onImageChange={handleImageChange}
+          onImageRemove={(index) =>
+            setImageFiles((current) => current.filter((_, currentIndex) => currentIndex !== index))
+          }
         />
       ) : null}
     </>

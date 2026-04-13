@@ -1,15 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import ConfirmModal from '../components/ConfirmModal';
 import HistoryList from '../components/HistoryList';
+import ImageModal from '../components/ImageModal';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { deleteWorkoutSession, getWorkoutHistory } from '../services/api';
+import {
+  deleteWorkoutPhoto,
+  deleteWorkoutSession,
+  getWorkoutHistory,
+} from '../services/api';
 import { formatWorkoutDate } from '../utils/date';
 
 function HistoryPage() {
   const [history, setHistory] = useState([]);
   const [pendingDeleteSession, setPendingDeleteSession] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [deletingSessionId, setDeletingSessionId] = useState(null);
+  const [deletingImagePath, setDeletingImagePath] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user } = useAuth();
@@ -72,7 +79,10 @@ function HistoryPage() {
     setDeletingSessionId(sessionId);
 
     try {
-      await deleteWorkoutSession(sessionId);
+      await deleteWorkoutSession({
+        sessionId,
+        imagePaths: pendingDeleteSession.image_paths ?? [],
+      });
       setHistory((current) => current.filter((session) => session.id !== sessionId));
       showToast('Workout day removed from history.', 'success');
       setPendingDeleteSession(null);
@@ -80,6 +90,33 @@ function HistoryPage() {
       showToast(deleteError.message, 'error');
     } finally {
       setDeletingSessionId(null);
+    }
+  }
+
+  async function handleDeletePhoto({ sessionId, imagePath }) {
+    setDeletingImagePath(imagePath);
+
+    try {
+      await deleteWorkoutPhoto({ sessionId, imagePath });
+      setHistory((current) =>
+        current.map((session) =>
+          session.id === sessionId
+            ? {
+                ...session,
+                image_paths: (session.image_paths ?? []).filter((path) => path !== imagePath),
+                images: (session.images ?? []).filter((image) => image.path !== imagePath),
+              }
+            : session,
+        ),
+      );
+      if (selectedImage?.imagePath === imagePath) {
+        setSelectedImage(null);
+      }
+      showToast('Photo removed from workout.', 'success');
+    } catch (deleteError) {
+      showToast(deleteError.message, 'error');
+    } finally {
+      setDeletingImagePath(null);
     }
   }
 
@@ -130,14 +167,27 @@ function HistoryPage() {
         <HistoryList
           sessions={history}
           deletingSessionId={deletingSessionId}
+          deletingImagePath={deletingImagePath}
           onDelete={(session) => setPendingDeleteSession(session)}
+          onDeletePhoto={handleDeletePhoto}
+          onImageOpen={setSelectedImage}
+        />
+      ) : null}
+
+      {selectedImage ? (
+        <ImageModal
+          imageUrl={selectedImage.imageUrl}
+          title={selectedImage.title}
+          onClose={() => setSelectedImage(null)}
         />
       ) : null}
 
       {pendingDeleteSession ? (
         <ConfirmModal
           title="Delete this day?"
-          message={`This will permanently remove the workout saved for ${formatWorkoutDate(pendingDeleteSession.workout_date)}.`}
+          message={`This will permanently remove the workout saved for ${formatWorkoutDate(
+            pendingDeleteSession.workout_date,
+          )}.`}
           confirmLabel="Delete day"
           isLoading={deletingSessionId === pendingDeleteSession.id}
           onConfirm={confirmDelete}

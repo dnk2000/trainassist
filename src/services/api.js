@@ -1,5 +1,7 @@
 import { supabase } from './supabase';
 
+const WORKOUT_IMAGES_BUCKET = 'workout-images';
+
 export async function getExerciseLibrary() {
   const { data, error } = await supabase
     .from('exercises')
@@ -42,6 +44,8 @@ export async function saveWorkoutSession({
   workoutDate,
   items,
   currentWeight,
+  comment,
+  imagePaths,
   workoutCode,
   workoutName,
 }) {
@@ -55,7 +59,7 @@ export async function saveWorkoutSession({
 
   const { data: existingSession, error: existingSessionError } = await supabase
     .from('workout_sessions')
-    .select('id')
+    .select('id, image_paths')
     .eq('user_id', userId)
     .eq('workout_date', workoutDate)
     .maybeSingle();
@@ -67,13 +71,20 @@ export async function saveWorkoutSession({
   let sessionId = existingSession?.id;
 
   if (sessionId) {
+    const updatePayload = {
+      current_weight: currentWeight,
+      comment,
+      workout_code: workoutCode,
+      workout_name: workoutName,
+    };
+
+    if (imagePaths !== undefined) {
+      updatePayload.image_paths = imagePaths;
+    }
+
     const { error: updateSessionError } = await supabase
       .from('workout_sessions')
-      .update({
-        current_weight: currentWeight,
-        workout_code: workoutCode,
-        workout_name: workoutName,
-      })
+      .update(updatePayload)
       .eq('id', sessionId);
 
     if (updateSessionError) {
@@ -95,6 +106,8 @@ export async function saveWorkoutSession({
         user_id: userId,
         workout_date: workoutDate,
         current_weight: currentWeight,
+        comment,
+        image_paths: imagePaths ?? [],
         workout_code: workoutCode,
         workout_name: workoutName,
       })
@@ -124,6 +137,22 @@ export async function saveWorkoutSession({
     throw exerciseError;
   }
 
+  if (imagePaths !== undefined) {
+    const previousPaths = existingSession?.image_paths ?? [];
+    const nextPaths = imagePaths ?? [];
+    const stalePaths = previousPaths.filter((path) => !nextPaths.includes(path));
+
+    if (stalePaths.length) {
+      const { error: storageError } = await supabase.storage
+        .from(WORKOUT_IMAGES_BUCKET)
+        .remove(stalePaths);
+
+      if (storageError) {
+        console.error(storageError);
+      }
+    }
+  }
+
   return sessionId;
 }
 
@@ -140,6 +169,8 @@ export async function getWorkoutHistory(userId) {
         workout_date,
         created_at,
         current_weight,
+        comment,
+        image_paths,
         workout_code,
         workout_name,
         workout_session_exercises (
@@ -162,19 +193,115 @@ export async function getWorkoutHistory(userId) {
     throw error;
   }
 
-  return (data ?? []).map((session) => ({
-    ...session,
-    exercises: (session.workout_session_exercises ?? [])
-      .sort((left, right) => (left.sort_order ?? 0) - (right.sort_order ?? 0))
-      .map((item) => ({
-        id: item.id,
-        title: item.exercise_title ?? item.exercise?.title ?? 'Untitled exercise',
-        details: item.exercise_details ?? null,
-      })),
-  }));
+  const sessions = await Promise.all(
+    (data ?? []).map(async (session) => ({
+      ...session,
+      images: await getWorkoutImageUrls(session.image_paths ?? []),
+      exercises: (session.workout_session_exercises ?? [])
+        .sort((left, right) => (left.sort_order ?? 0) - (right.sort_order ?? 0))
+        .map((item) => ({
+          id: item.id,
+          title: item.exercise_title ?? item.exercise?.title ?? 'Untitled exercise',
+          details: item.exercise_details ?? null,
+        })),
+    })),
+  );
+
+  return sessions;
 }
 
-export async function deleteWorkoutSession(sessionId) {
+export async function uploadWorkoutImages({ userId, workoutDate, files }) {
+  if (!userId || !workoutDate || !files?.length) {
+    throw new Error('Missing image upload data.');
+  }
+
+  const uploadedPaths = [];
+
+  for (const [index, file] of files.entries()) {
+    const safeExtension = file.name?.split('.').pop()?.toLowerCase();
+    const extension =
+      safeExtension && /^[a-z0-9]+$/.test(safeExtension)
+        ? safeExtension
+        : file.type?.split('/').pop()?.toLowerCase() || 'jpg';
+    const path = `${userId}/${workoutDate}/${Date.now()}-${index}.${extension}`;
+
+    const { error } = await supabase.storage
+      .from(WORKOUT_IMAGES_BUCKET)
+      .upload(path, file, {
+        upsert: false,
+        contentType: file.type || undefined,
+      });
+
+    if (error) {
+      if (uploadedPaths.length) {
+        await supabase.storage.from(WORKOUT_IMAGES_BUCKET).remove(uploadedPaths);
+      }
+      throw error;
+    }
+
+    uploadedPaths.push(path);
+  }
+
+  return uploadedPaths;
+}
+
+export async function getWorkoutImageUrls(imagePaths) {
+  if (!imagePaths?.length) {
+    return [];
+  }
+
+  const { data, error } = await supabase.storage
+    .from(WORKOUT_IMAGES_BUCKET)
+    .createSignedUrls(imagePaths, 60 * 60);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? [])
+    .map((item, index) => ({
+      path: imagePaths[index],
+      url: item?.signedUrl ?? null,
+    }))
+    .filter((item) => item.url);
+}
+
+export async function deleteWorkoutPhoto({ sessionId, imagePath }) {
+  if (!sessionId || !imagePath) {
+    throw new Error('Missing workout photo data.');
+  }
+
+  const { data: session, error: sessionError } = await supabase
+    .from('workout_sessions')
+    .select('image_paths')
+    .eq('id', sessionId)
+    .maybeSingle();
+
+  if (sessionError) {
+    throw sessionError;
+  }
+
+  const nextImagePaths = (session?.image_paths ?? []).filter((path) => path !== imagePath);
+
+  const { error: updateError } = await supabase
+    .from('workout_sessions')
+    .update({ image_paths: nextImagePaths })
+    .eq('id', sessionId);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  const { error: storageError } = await supabase.storage
+    .from(WORKOUT_IMAGES_BUCKET)
+    .remove([imagePath]);
+
+  if (storageError) {
+    console.error(storageError);
+  }
+}
+
+export async function deleteWorkoutSession({ sessionId, imagePaths = [] }) {
   if (!sessionId) {
     throw new Error('Missing workout session id.');
   }
@@ -186,5 +313,15 @@ export async function deleteWorkoutSession(sessionId) {
 
   if (error) {
     throw error;
+  }
+
+  if (imagePaths.length) {
+    const { error: storageError } = await supabase.storage
+      .from(WORKOUT_IMAGES_BUCKET)
+      .remove(imagePaths);
+
+    if (storageError) {
+      console.error(storageError);
+    }
   }
 }
