@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import SaveButton from '../components/SaveButton';
 import VideoModal from '../components/VideoModal';
 import WorkoutSection from '../components/WorkoutSection';
@@ -19,10 +19,46 @@ import {
   getWorkoutTabs,
 } from '../utils/trainingPlan';
 
+function parseLocalDate(dateString) {
+  return dateString ? new Date(`${dateString}T00:00:00`) : new Date();
+}
+
+function getWorkoutDraftStorageKey(userId, workoutCode) {
+  if (!userId || !workoutCode) {
+    return '';
+  }
+
+  return `trainassist:workout-draft:${userId}:${workoutCode}`;
+}
+
+function getWorkoutFormStorageKey(userId) {
+  if (!userId) {
+    return '';
+  }
+
+  return `trainassist:workout-form:${userId}`;
+}
+
+function readWorkoutFormDraft(userId) {
+  const storageKey = getWorkoutFormStorageKey(userId);
+
+  if (!storageKey) {
+    return null;
+  }
+
+  try {
+    const savedDraft = window.localStorage.getItem(storageKey);
+    return savedDraft ? JSON.parse(savedDraft) : null;
+  } catch {
+    return null;
+  }
+}
+
 function HomePage() {
   const [exerciseLibrary, setExerciseLibrary] = useState([]);
   const [checkedIds, setCheckedIds] = useState([]);
   const [workoutDate, setWorkoutDate] = useState(() => getTodayDateString());
+  const [latestWeightDefault, setLatestWeightDefault] = useState('');
   const [weight, setWeight] = useState('');
   const [comment, setComment] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
@@ -34,6 +70,10 @@ function HomePage() {
   const [error, setError] = useState('');
   const { user } = useAuth();
   const { showToast } = useToast();
+  const hasHydratedFormDraftRef = useRef(false);
+  const skipNextFormDraftPersistRef = useRef(false);
+  const hasHydratedCheckedDraftRef = useRef(false);
+  const skipNextCheckedDraftPersistRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -44,12 +84,25 @@ function HomePage() {
           getExerciseLibrary(),
           getLatestSavedWeight(user.id),
         ]);
+        const formDraft = readWorkoutFormDraft(user.id);
 
         if (active) {
           setExerciseLibrary(libraryData);
-          if (latestSavedWeight !== null) {
+          if (formDraft?.workoutDate) {
+            setWorkoutDate(formDraft.workoutDate);
+            setSelectedWorkoutCode(getScheduledWorkoutCode(parseLocalDate(formDraft.workoutDate)));
+          }
+          if (typeof formDraft?.weight === 'string') {
+            setWeight(formDraft.weight);
+          } else if (latestSavedWeight !== null) {
             setWeight(String(latestSavedWeight));
           }
+          setLatestWeightDefault(latestSavedWeight !== null ? String(latestSavedWeight) : '');
+          if (typeof formDraft?.comment === 'string') {
+            setComment(formDraft.comment);
+          }
+          hasHydratedFormDraftRef.current = true;
+          skipNextFormDraftPersistRef.current = true;
           setError('');
         }
       } catch (loadError) {
@@ -86,19 +139,99 @@ function HomePage() {
 
   const trainingPlan = getTrainingPlan();
   const workoutTabs = useMemo(() => getWorkoutTabs(), []);
-  const scheduledWorkoutCode = useMemo(() => getScheduledWorkoutCode(), []);
+  const todayDate = getTodayDateString();
+  const scheduledWorkoutCode = useMemo(
+    () => getScheduledWorkoutCode(parseLocalDate(workoutDate)),
+    [workoutDate],
+  );
+  const scheduledTabLabel = workoutDate === todayDate ? 'Today' : 'Planned';
   const isViewingScheduledWorkout = selectedWorkoutCode === scheduledWorkoutCode;
   const workout = useMemo(
-    () => attachExerciseLibrary(getWorkoutByCode(selectedWorkoutCode), exerciseLibrary),
-    [exerciseLibrary, selectedWorkoutCode],
+    () =>
+      attachExerciseLibrary(
+        getWorkoutByCode(selectedWorkoutCode, parseLocalDate(workoutDate)),
+        exerciseLibrary,
+      ),
+    [exerciseLibrary, selectedWorkoutCode, workoutDate],
   );
   const selectedSet = useMemo(() => new Set(checkedIds), [checkedIds]);
   const workoutItems = useMemo(
     () => workout?.sections.flatMap((section) => section.items) ?? [],
     [workout],
   );
+  const formDraftStorageKey = useMemo(() => getWorkoutFormStorageKey(user.id), [user.id]);
+  const draftStorageKey = useMemo(
+    () => getWorkoutDraftStorageKey(user.id, selectedWorkoutCode),
+    [selectedWorkoutCode, user.id],
+  );
   const selectedCount = checkedIds.length;
   const allSelected = workoutItems.length > 0 && checkedIds.length === workoutItems.length;
+
+  useEffect(() => {
+    if (!draftStorageKey) {
+      hasHydratedCheckedDraftRef.current = false;
+      setCheckedIds([]);
+      return;
+    }
+
+    try {
+      const savedDraft = window.localStorage.getItem(draftStorageKey);
+      const parsedDraft = savedDraft ? JSON.parse(savedDraft) : [];
+      const validItemIds = new Set(workoutItems.map((item) => item.id));
+      const nextCheckedIds = Array.isArray(parsedDraft)
+        ? parsedDraft.filter((itemId) => validItemIds.has(itemId))
+        : [];
+
+      hasHydratedCheckedDraftRef.current = true;
+      skipNextCheckedDraftPersistRef.current = true;
+      setCheckedIds(nextCheckedIds);
+    } catch {
+      hasHydratedCheckedDraftRef.current = true;
+      skipNextCheckedDraftPersistRef.current = true;
+      setCheckedIds([]);
+    }
+  }, [draftStorageKey, workoutItems]);
+
+  useEffect(() => {
+    if (!draftStorageKey || !hasHydratedCheckedDraftRef.current) {
+      return;
+    }
+
+    if (skipNextCheckedDraftPersistRef.current) {
+      skipNextCheckedDraftPersistRef.current = false;
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(draftStorageKey, JSON.stringify(checkedIds));
+    } catch {
+      // Ignore localStorage write failures and keep the in-memory state working.
+    }
+  }, [checkedIds, draftStorageKey]);
+
+  useEffect(() => {
+    if (!formDraftStorageKey || !hasHydratedFormDraftRef.current) {
+      return;
+    }
+
+    if (skipNextFormDraftPersistRef.current) {
+      skipNextFormDraftPersistRef.current = false;
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        formDraftStorageKey,
+        JSON.stringify({
+          workoutDate,
+          weight,
+          comment,
+        }),
+      );
+    } catch {
+      // Ignore localStorage write failures and keep the in-memory state working.
+    }
+  }, [comment, formDraftStorageKey, weight, workoutDate]);
 
   function handleToggle(itemId) {
     setCheckedIds((current) =>
@@ -117,7 +250,12 @@ function HomePage() {
 
   function handleWorkoutTabChange(workoutCode) {
     setSelectedWorkoutCode(workoutCode);
-    setCheckedIds([]);
+    setSelectedExercise(null);
+  }
+
+  function handleWorkoutDateChange(nextWorkoutDate) {
+    setWorkoutDate(nextWorkoutDate);
+    setSelectedWorkoutCode(getScheduledWorkoutCode(parseLocalDate(nextWorkoutDate)));
     setSelectedExercise(null);
   }
 
@@ -137,6 +275,23 @@ function HomePage() {
       return combinedFiles;
     });
     event.target.value = '';
+  }
+
+  function resetFormToDefaults() {
+    if (draftStorageKey) {
+      window.localStorage.removeItem(draftStorageKey);
+    }
+    if (formDraftStorageKey) {
+      window.localStorage.removeItem(formDraftStorageKey);
+    }
+
+    setCheckedIds([]);
+    setWorkoutDate(getTodayDateString());
+    setSelectedWorkoutCode(getScheduledWorkoutCode());
+    setWeight(latestWeightDefault);
+    setComment('');
+    setImageFiles([]);
+    setSelectedExercise(null);
   }
 
   async function handleSave() {
@@ -171,7 +326,23 @@ function HomePage() {
         workoutName: workout?.workoutName ?? null,
       });
 
+      const nextDefaultWeight =
+        parsedWeight !== null ? String(parsedWeight) : latestWeightDefault;
+
+      setLatestWeightDefault(nextDefaultWeight);
+      if (draftStorageKey) {
+        window.localStorage.removeItem(draftStorageKey);
+      }
+      if (formDraftStorageKey) {
+        window.localStorage.removeItem(formDraftStorageKey);
+      }
+      setCheckedIds([]);
+      setWorkoutDate(getTodayDateString());
+      setSelectedWorkoutCode(getScheduledWorkoutCode());
+      setWeight(nextDefaultWeight);
+      setComment('');
       setImageFiles([]);
+      setSelectedExercise(null);
       showToast(`Workout saved for ${formatWorkoutDate(workoutDate)}.`, 'success');
     } catch (saveError) {
       showToast(saveError.message, 'error');
@@ -182,11 +353,11 @@ function HomePage() {
 
   return (
     <>
-      <section className="mb-5 rounded-3xl border border-white/10 bg-slate-900/70 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-300/80">
+      <section className="mb-5 rounded-3xl border border-slate-200 bg-white/85 p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-700">
           {trainingPlan.plan_name}
         </p>
-        <h2 className="mt-2 text-2xl font-semibold text-white">
+        <h2 className="mt-2 text-2xl font-semibold text-slate-950">
           {isViewingScheduledWorkout
             ? workout?.isRestDay
               ? `${humanizeDayName(workout.dayName)} recovery day`
@@ -195,7 +366,7 @@ function HomePage() {
               ? 'Recovery workout'
               : 'Workout preview'}
         </h2>
-        <p className="mt-2 text-sm text-slate-300">
+        <p className="mt-2 text-sm text-slate-600">
           {workout?.workoutCode ? `${workout.workoutCode} · ` : ''}
           {workout?.workoutName ?? 'No workout scheduled'}
           {workout?.estimatedDurationMin ? ` · about ${workout.estimatedDurationMin} min` : ''}
@@ -203,7 +374,7 @@ function HomePage() {
       </section>
 
       <section className="mb-5">
-        <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-2">
+        <div className="rounded-3xl border border-slate-200 bg-white/85 p-2">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {workoutTabs.map((tab) => {
               const isActive = tab.code === selectedWorkoutCode;
@@ -216,18 +387,18 @@ function HomePage() {
                   onClick={() => handleWorkoutTabChange(tab.code)}
                   className={`min-h-11 shrink-0 rounded-2xl px-4 text-sm font-medium transition ${
                     isActive
-                      ? 'bg-sky-400 text-slate-950'
-                      : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white'
+                      ? 'bg-slate-950 text-white'
+                      : 'bg-slate-50/90 text-slate-600 hover:bg-slate-200 hover:text-slate-950'
                   }`}
                 >
                   {tab.label}
-                  {isScheduled ? ' · Today' : ''}
+                  {isScheduled ? ` · ${scheduledTabLabel}` : ''}
                 </button>
               );
             })}
           </div>
           {workout ? (
-            <p className="px-2 pt-2 text-sm text-slate-400">
+            <p className="px-2 pt-2 text-sm text-slate-500">
               {workout.workoutCode ? `${workout.workoutCode} · ` : ''}
               {workout.workoutName}
             </p>
@@ -236,22 +407,22 @@ function HomePage() {
       </section>
 
       {loading ? (
-        <div className="rounded-3xl border border-white/10 bg-slate-900/70 px-5 py-10 text-center text-slate-300">
+        <div className="rounded-3xl border border-slate-200 bg-white/85 px-5 py-10 text-center text-slate-600">
           Loading today&apos;s workout...
         </div>
       ) : null}
 
       {!loading && error ? (
-        <div className="rounded-3xl border border-rose-400/20 bg-rose-950/40 px-5 py-10 text-center">
-          <h2 className="text-lg font-semibold text-white">Could not load today&apos;s plan</h2>
-          <p className="mt-2 text-sm text-rose-100/80">{error}</p>
+        <div className="rounded-3xl border border-rose-400/20 bg-rose-50 px-5 py-10 text-center">
+          <h2 className="text-lg font-semibold text-slate-950">Could not load today&apos;s plan</h2>
+          <p className="mt-2 text-sm text-rose-700">{error}</p>
         </div>
       ) : null}
 
       {!loading && !error && !workout ? (
-        <div className="rounded-3xl border border-dashed border-white/15 bg-slate-900/50 px-5 py-10 text-center">
-          <h2 className="text-lg font-semibold text-white">No workout scheduled</h2>
-          <p className="mt-2 text-sm text-slate-400">
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white/75 px-5 py-10 text-center">
+          <h2 className="text-lg font-semibold text-slate-950">No workout scheduled</h2>
+          <p className="mt-2 text-sm text-slate-500">
             Check `training-plan.json` and make sure today has a matching `workout_type`.
           </p>
         </div>
@@ -259,9 +430,9 @@ function HomePage() {
 
       {!loading && !error && workout?.isRestDay ? (
         <div className="space-y-4">
-          <div className="rounded-3xl border border-emerald-400/20 bg-emerald-950/30 p-5">
-            <h3 className="text-lg font-semibold text-white">Take it easy today</h3>
-            <p className="mt-2 text-sm text-emerald-50/85">
+          <div className="rounded-3xl border border-emerald-400/20 bg-emerald-50 p-5">
+            <h3 className="text-lg font-semibold text-slate-950">Take it easy today</h3>
+            <p className="mt-2 text-sm text-emerald-700/85">
               {workout.instructions.join(' · ') || 'Rest or go for a light walk.'}
             </p>
           </div>
@@ -288,10 +459,11 @@ function HomePage() {
           disabled={!selectedCount}
           isLoading={saving}
           onClick={handleSave}
+          onReset={resetFormToDefaults}
           selectedCount={selectedCount}
           totalCount={workoutItems.length}
           workoutDate={workoutDate}
-          onWorkoutDateChange={setWorkoutDate}
+          onWorkoutDateChange={handleWorkoutDateChange}
           weight={weight}
           onWeightChange={setWeight}
           comment={comment}

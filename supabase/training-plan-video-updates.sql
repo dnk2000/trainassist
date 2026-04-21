@@ -26,8 +26,12 @@ set youtube_url = 'https://www.youtube.com/watch?v=XStveWETjvk'
 where lower(title) = lower('Dead Bug');
 
 update public.exercises
-set youtube_url = 'https://www.youtube.com/watch?v=ljgqer1ZpXg'
+set title = 'Prone W Raise'
 where lower(title) = lower('Face Pull');
+
+update public.exercises
+set youtube_url = 'https://www.youtube.com/watch?v=tl9GV1DjwYs'
+where lower(title) = lower('Prone W Raise');
 
 update public.exercises
 set youtube_url = 'https://www.youtube.com/watch?v=wPM8icPu6H8'

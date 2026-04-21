@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family:
     "Plus Jakarta Sans",
     ui-sans-serif,
     system-ui,
     sans-serif;
   background:
-    radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 34%),
-    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+    radial-gradient(circle at top, rgba(14, 165, 233, 0.16), transparent 34%),
+    linear-gradient(180deg, #f8fafc 0%, #e0f2fe 100%);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  color: #e2e8f0;
+  color: #0f172a;
 }
 
 #root {
@@ -30,9 +30,21 @@ label {
   -webkit-tap-highlight-color: transparent;
 }
 
+button:not(:disabled),
+a[href],
+label:has(input[type="checkbox"]),
+label:has(input[type="file"]),
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
 .glass-panel {
   backdrop-filter: blur(18px);
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .page-enter {

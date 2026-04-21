@@ -4,8 +4,10 @@ import { ToastProvider } from './hooks/useToast';
 import AppShell from './components/AppShell';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthPage from './pages/AuthPage';
+import DashboardPage from './pages/DashboardPage';
 import HomePage from './pages/HomePage';
 import HistoryPage from './pages/HistoryPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -21,8 +23,10 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<HomePage />} />
+            <Route index element={<DashboardPage />} />
+            <Route path="workout" element={<HomePage />} />
             <Route path="history" element={<HistoryPage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

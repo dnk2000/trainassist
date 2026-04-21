@@ -17,6 +17,27 @@ export async function getExerciseLibrary() {
   return data ?? [];
 }
 
+export async function updateUserProfile({ firstName, lastName }) {
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      first_name: firstName,
+      last_name: lastName,
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function updateUserPassword({ password }) {
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function getLatestSavedWeight(userId) {
   if (!userId) {
     return null;
@@ -208,6 +229,25 @@ export async function getWorkoutHistory(userId) {
   );
 
   return sessions;
+}
+
+export async function getWorkoutProgressSessions(userId) {
+  if (!userId) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('workout_sessions')
+    .select('id, workout_date, created_at, current_weight')
+    .eq('user_id', userId)
+    .order('workout_date', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
 }
 
 export async function uploadWorkoutImages({ userId, workoutDate, files }) {

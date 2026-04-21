@@ -1,7 +1,7 @@
 const toneStyles = {
-  info: 'border-sky-400/30 bg-slate-900/90 text-slate-50',
-  success: 'border-emerald-400/30 bg-emerald-950/90 text-emerald-50',
-  error: 'border-rose-400/30 bg-rose-950/90 text-rose-50',
+  info: 'border-slate-300 bg-white/90 text-slate-950',
+  success: 'border-emerald-400/30 bg-emerald-50 text-emerald-700',
+  error: 'border-rose-400/30 bg-rose-50 text-rose-700',
 };
 
 function ToastViewport({ toasts, onDismiss }) {
@@ -18,7 +18,7 @@ function ToastViewport({ toasts, onDismiss }) {
               <button
                 type="button"
                 onClick={() => onDismiss(toast.id)}
-                className="min-h-11 min-w-11 rounded-full text-sm text-slate-300 transition hover:text-white"
+                className="min-h-11 min-w-11 rounded-full text-sm text-slate-600 transition hover:text-slate-950"
                 aria-label="Dismiss notification"
               >
                 Close

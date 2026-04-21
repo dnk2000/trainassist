@@ -1,6 +1,6 @@
-# TrainAssist
+# NoDobraFit
 
-TrainAssist is a mobile-first workout tracker built with React, Vite, Tailwind CSS, and Supabase.
+NoDobraFit is a mobile-first workout tracker built with React, Vite, Tailwind CSS, and Supabase.
 It uses your local [`training-plan.json`](training-plan.json) as the source of truth for the workout program, shows the correct workout for the current day by default, lets you switch to other workout tabs, watch exercise videos, save completed items with your current weight, and review or delete history by day.
 
 ## Features

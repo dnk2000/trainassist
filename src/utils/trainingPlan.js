@@ -14,7 +14,19 @@ function joinParts(parts) {
   return parts.filter(Boolean).join(' • ');
 }
 
-function formatExerciseDetails(exercise, section) {
+function formatRounds(section) {
+  if (section.rounds && section.rounds_max && section.rounds !== section.rounds_max) {
+    return `${section.rounds}-${section.rounds_max} rounds`;
+  }
+
+  if (section.rounds_max) {
+    return `1-${section.rounds_max} rounds`;
+  }
+
+  return section.rounds ? `${section.rounds} rounds` : null;
+}
+
+function formatExerciseDetails(exercise) {
   return joinParts([
     exercise.sets ? `${exercise.sets} set${exercise.sets === 1 ? '' : 's'}` : null,
     exercise.reps ? `${exercise.reps} reps` : null,
@@ -29,9 +41,6 @@ function formatExerciseDetails(exercise, section) {
       ? `${exercise.duration_seconds_min}+ sec`
       : null,
     exercise.reps_rule ? humanize(exercise.reps_rule) : null,
-    section?.rounds ? `${section.rounds} rounds` : null,
-    section?.rounds_max ? `up to ${section.rounds_max}` : null,
-    section?.rest_between_rounds_seconds ? `rest ${section.rest_between_rounds_seconds} sec` : null,
   ]);
 }
 
@@ -76,12 +85,12 @@ function buildSection(plan, section, startIndex) {
         section.format ? humanize(section.format) : null,
         section.duration_min ? `${section.duration_min} min` : null,
         section.duration_max ? `up to ${section.duration_max} min` : null,
-        section.rounds ? `${section.rounds} rounds` : null,
+        formatRounds(section),
       ]),
       items: section.exercises.map((exercise, index) => ({
         id: `${section.section_name}-${index}-${normalizeKey(exercise.exercise)}`,
         title: exercise.exercise,
-        details: formatExerciseDetails(exercise, section),
+        details: formatExerciseDetails(exercise),
         normalizedTitle: normalizeKey(exercise.exercise),
         sortOrder: startIndex + index,
       })),

@@ -1,71 +1,91 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useToast } from '../hooks/useToast';
+import { NavLink, Outlet } from 'react-router-dom';
 
 function AppShell() {
-  const { signOut, user } = useAuth();
-  const { showToast } = useToast();
-  const navigate = useNavigate();
-
-  async function handleSignOut() {
-    const { error } = await signOut();
-
-    if (error) {
-      showToast(error.message, 'error');
-      return;
-    }
-
-    showToast('Signed out successfully.', 'success');
-    navigate('/auth', { replace: true });
-  }
+  const navLinkClass = ({ isActive }) =>
+    `flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-xl px-1 text-center text-[0.68rem] font-semibold leading-none transition sm:text-xs ${
+      isActive ? 'text-slate-950' : 'text-slate-400 hover:text-slate-700'
+    }`;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pt-4 sm:px-6">
-      <header className="glass-panel mb-5 rounded-3xl border border-white/10 px-4 py-4 shadow-lg shadow-slate-950/20">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-300/80">
-              TrainAssist
-            </p>
-            <h1 className="mt-1 text-xl font-semibold text-white sm:text-2xl">Daily workout tracker</h1>
-            <p className="mt-1 truncate text-sm text-slate-300">{user?.email}</p>
-          </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="min-h-11 shrink-0 whitespace-nowrap rounded-full border border-white/10 px-3 text-sm font-medium text-slate-100 transition hover:border-white/20 hover:bg-white/5 sm:px-4"
-          >
-            Sign out
-          </button>
-        </div>
-        <nav className="mt-4 flex gap-2 rounded-2xl bg-slate-900/70 p-1">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              `flex min-h-11 flex-1 items-center justify-center rounded-2xl px-4 text-sm font-medium transition ${
-                isActive ? 'bg-sky-400 text-slate-950' : 'text-slate-300 hover:bg-white/5 hover:text-white'
-              }`
-            }
-          >
-            Workout
-          </NavLink>
-          <NavLink
-            to="/history"
-            className={({ isActive }) =>
-              `flex min-h-11 flex-1 items-center justify-center rounded-2xl px-4 text-sm font-medium transition ${
-                isActive ? 'bg-sky-400 text-slate-950' : 'text-slate-300 hover:bg-white/5 hover:text-white'
-              }`
-            }
-          >
-            History
-          </NavLink>
-        </nav>
-      </header>
-
+    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-28 pt-4 sm:px-6">
       <main className="page-enter flex-1">
         <Outlet />
       </main>
+
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/90 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2 shadow-2xl shadow-slate-300/50 backdrop-blur-xl">
+        <div className="mx-auto grid max-w-3xl grid-cols-4 gap-1">
+          <NavLink to="/" end className={navLinkClass}>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+            >
+              <path d="m3 10 9-7 9 7" />
+              <path d="M5 10v10h14V10" />
+              <path d="M9 20v-6h6v6" />
+            </svg>
+            <span>Today</span>
+          </NavLink>
+          <NavLink to="/workout" className={navLinkClass}>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+            >
+              <path d="M6 12h12" />
+              <path d="M6 8v8" />
+              <path d="M18 8v8" />
+              <path d="M3 10v4" />
+              <path d="M21 10v4" />
+            </svg>
+            <span>Workout</span>
+          </NavLink>
+          <NavLink to="/history" className={navLinkClass}>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+            >
+              <path d="M4 19V5" />
+              <path d="M4 19h16" />
+              <path d="m7 15 4-4 3 3 5-7" />
+              <path d="M17 7h2v2" />
+            </svg>
+            <span>Progress</span>
+          </NavLink>
+          <NavLink to="/profile" className={navLinkClass}>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+            >
+              <path d="M20 21a8 8 0 0 0-16 0" />
+              <path d="M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
+            </svg>
+            <span>Profile</span>
+          </NavLink>
+        </div>
+      </nav>
     </div>
   );
 }

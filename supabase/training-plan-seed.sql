@@ -50,15 +50,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Face Pull', null, 7, true
-where not exists (
-  select 1
-  from public.exercises
-  where lower(title) = lower('Face Pull')
-);
-
-insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Glute Bridge', null, 8, true
+select 'Glute Bridge', null, 7, true
 where not exists (
   select 1
   from public.exercises
@@ -66,7 +58,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'High Knees', null, 9, true
+select 'High Knees', null, 8, true
 where not exists (
   select 1
   from public.exercises
@@ -74,7 +66,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Jump Squats', null, 10, true
+select 'Jump Squats', null, 9, true
 where not exists (
   select 1
   from public.exercises
@@ -82,7 +74,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Leg Raises', null, 11, true
+select 'Leg Raises', null, 10, true
 where not exists (
   select 1
   from public.exercises
@@ -90,7 +82,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Mountain Climbers', null, 12, true
+select 'Mountain Climbers', null, 11, true
 where not exists (
   select 1
   from public.exercises
@@ -98,11 +90,19 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Plank', null, 13, true
+select 'Plank', null, 12, true
 where not exists (
   select 1
   from public.exercises
   where lower(title) = lower('Plank')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Prone W Raise', null, 13, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Prone W Raise')
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)

@@ -7,7 +7,7 @@ function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 text-center text-slate-200">
+      <div className="flex min-h-screen items-center justify-center px-4 text-center text-slate-700">
         Loading your workout tracker...
       </div>
     );
