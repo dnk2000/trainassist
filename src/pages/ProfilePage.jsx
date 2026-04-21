@@ -83,7 +83,7 @@ function ProfilePage() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-3xl border border-slate-200 bg-white/85 p-5">
+      <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-700">
           My profile
         </p>
@@ -94,7 +94,7 @@ function ProfilePage() {
       </div>
 
       <form
-        className="rounded-3xl border border-slate-200 bg-white/85 p-5"
+        className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5"
         onSubmit={handleProfileSubmit}
       >
         <div className="grid gap-4 sm:grid-cols-2">
@@ -141,7 +141,7 @@ function ProfilePage() {
       </form>
 
       <form
-        className="rounded-3xl border border-slate-200 bg-white/85 p-5"
+        className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5"
         onSubmit={handlePasswordSubmit}
       >
         <h3 className="text-lg font-semibold text-slate-950">Change password</h3>
@@ -181,7 +181,7 @@ function ProfilePage() {
         </button>
       </form>
 
-      <div className="rounded-3xl border border-slate-200 bg-white/85 p-5">
+      <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
         <h3 className="text-lg font-semibold text-slate-950">Account</h3>
         <p className="mt-2 text-sm leading-6 text-slate-600">
           Sign out of this device when you are done.

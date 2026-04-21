@@ -181,34 +181,34 @@ function HistoryPage() {
 
   return (
     <section>
-      <div className="mb-5 rounded-3xl border border-slate-200 bg-white/85 p-5">
+      <div className="mb-5 rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-700">
           Progress
         </p>
         <div className="mt-3 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4">
+          <div className="rounded-2xl border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Current streak</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{summary.currentStreak} days</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4">
+          <div className="rounded-2xl border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Best streak</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{summary.bestStreak} days</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4">
+          <div className="rounded-2xl border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Total days</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{summary.totalDays} days</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4">
+          <div className="rounded-2xl border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Latest weight</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">
               {summary.latestWeight !== null ? `${summary.latestWeight} kg` : 'No data'}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4">
+          <div className="rounded-2xl border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Exercises done</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{summary.totalCompleted}</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4">
+          <div className="rounded-2xl border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Last session</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">
               {summary.latestSessionDate ? formatWorkoutDate(summary.latestSessionDate) : 'No data'}
@@ -232,7 +232,7 @@ function HistoryPage() {
       ) : null}
 
       {loading ? (
-        <div className="rounded-3xl border border-slate-200 bg-white/85 px-5 py-10 text-center text-slate-600">
+        <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 px-5 py-10 text-center text-slate-600">
           Loading progress...
         </div>
       ) : null}

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import WeightChart from '../components/WeightChart';
 import { useAuth } from '../hooks/useAuth';
 import { getWorkoutProgressSessions } from '../services/api';
-import { getTodayDateString, humanizeDayName } from '../utils/date';
+import { getTodayDateString } from '../utils/date';
 import { getWorkoutProgressSummary } from '../utils/progress';
 import { getScheduledWorkoutCode, getWorkoutByCode } from '../utils/trainingPlan';
 
@@ -30,6 +31,14 @@ function getWeekDays(today) {
   });
 }
 
+function formatFullDate(date) {
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
+}
+
 function DashboardPage() {
   const { user } = useAuth();
   const [progressSessions, setProgressSessions] = useState([]);
@@ -40,13 +49,32 @@ function DashboardPage() {
   const weekDays = useMemo(() => getWeekDays(new Date(`${todayDate}T00:00:00`)), [todayDate]);
   const workoutCode = getScheduledWorkoutCode(today);
   const workout = getWorkoutByCode(workoutCode, today);
-  const workoutLabel = workout?.isRestDay
-    ? 'Recovery day'
-    : workout?.workoutCode
-      ? `${workout.workoutCode} workout`
-      : 'Workout';
+  const firstName = user?.user_metadata?.first_name;
+  const greetingName = firstName || 'there';
+  const todayTitle = formatFullDate(today);
+  const todaySummary = workout?.isRestDay
+    ? 'You have a recovery day.'
+    : `Your today's workout is ${workout?.workoutName ?? 'not scheduled'}.`;
   const progressSummary = useMemo(
     () => getWorkoutProgressSummary(progressSessions),
+    [progressSessions],
+  );
+  const weightPoints = useMemo(
+    () =>
+      [...progressSessions]
+        .filter(
+          (session) =>
+            session.current_weight !== null && session.current_weight !== undefined,
+        )
+        .sort((left, right) => left.workout_date.localeCompare(right.workout_date))
+        .map((session) => ({
+          date: session.workout_date,
+          weight: Number(session.current_weight),
+        })),
+    [progressSessions],
+  );
+  const completedWorkoutDates = useMemo(
+    () => new Set(progressSessions.map((session) => session.workout_date)),
     [progressSessions],
   );
   const completedToday = progressSessions.some((session) => session.workout_date === todayDate);
@@ -82,50 +110,57 @@ function DashboardPage() {
 
   return (
     <section className="space-y-5">
+      <div>
+        <h2 className="text-3xl font-semibold text-slate-950">Hi, {greetingName}</h2>
+        <p className="mt-1 text-sm text-slate-500">Let&apos;s check your activity</p>
+      </div>
+
       <div className="grid grid-cols-7 gap-2">
         {weekDays.map((weekDay) => {
           const isToday = weekDay.dateString === todayDate;
+          const hasWorkout = completedWorkoutDates.has(weekDay.dateString);
 
           return (
             <div
               key={weekDay.dateString}
-              className={`flex min-h-16 flex-col items-center justify-center rounded-2xl px-1 ${
-                isToday ? 'bg-slate-950 text-white' : 'bg-white/85 text-slate-600'
+              className={`flex min-h-[4.5rem] flex-col items-center justify-center rounded-2xl px-1 pb-2 pt-3 ${
+                isToday ? 'bg-slate-950 text-white' : 'bg-slate-200/90 text-slate-700'
               }`}
               aria-current={isToday ? 'date' : undefined}
             >
-              <span className="text-xl font-semibold leading-none">{weekDay.dayNumber}</span>
+              <span className="text-xl font-normal leading-none">{weekDay.dayNumber}</span>
               <span
-                className={`mt-1 text-xs font-semibold ${
+                className={`mt-1 text-xs font-normal ${
                   isToday ? 'text-white/65' : 'text-slate-400'
                 }`}
               >
                 {weekDay.dayName}
               </span>
+              <span
+                className={`mt-2 h-1.5 w-1.5 rounded-full ${
+                  hasWorkout ? (isToday ? 'bg-white' : 'bg-slate-950') : 'bg-transparent'
+                }`}
+                aria-hidden="true"
+              />
             </div>
           );
         })}
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white/85 p-5">
+      <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
               Today
             </p>
             <h3 className="mt-2 text-2xl font-semibold text-slate-950">
-              {completedToday ? 'Done for today' : workoutLabel}
+              {completedToday ? 'Done for today' : todaySummary}
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               {completedToday
                 ? 'You nailed it. Nice work showing up today.'
-                : `${workout?.workoutName ?? 'No workout scheduled'}${
-                    workout?.estimatedDurationMin ? ` · about ${workout.estimatedDurationMin} min` : ''
-                  }`}
+                : todayTitle}
             </p>
-            {!completedToday && workout?.dayName ? (
-              <p className="mt-1 text-sm text-slate-500">{humanizeDayName(workout.dayName)}</p>
-            ) : null}
           </div>
           <div
             className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${
@@ -172,13 +207,13 @@ function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-3xl border border-slate-200 bg-white/85 p-5">
+        <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Current streak</p>
           <p className="mt-2 text-2xl font-semibold text-slate-950">
             {progressLoading ? '...' : `${progressSummary.currentStreak} days`}
           </p>
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white/85 p-5">
+        <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Latest weight</p>
           <p className="mt-2 text-2xl font-semibold text-slate-950">
             {progressLoading
@@ -192,6 +227,10 @@ function DashboardPage() {
 
       {progressError ? (
         <p className="text-sm text-rose-700">Could not load progress: {progressError}</p>
+      ) : null}
+
+      {!progressLoading && !progressError && weightPoints.length ? (
+        <WeightChart points={weightPoints} />
       ) : null}
     </section>
   );

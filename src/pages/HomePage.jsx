@@ -353,7 +353,7 @@ function HomePage() {
 
   return (
     <>
-      <section className="mb-5 rounded-3xl border border-slate-200 bg-white/85 p-5">
+      <section className="mb-5 rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-700">
           {trainingPlan.plan_name}
         </p>
@@ -374,7 +374,7 @@ function HomePage() {
       </section>
 
       <section className="mb-5">
-        <div className="rounded-3xl border border-slate-200 bg-white/85 p-2">
+        <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-2">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {workoutTabs.map((tab) => {
               const isActive = tab.code === selectedWorkoutCode;
@@ -407,7 +407,7 @@ function HomePage() {
       </section>
 
       {loading ? (
-        <div className="rounded-3xl border border-slate-200 bg-white/85 px-5 py-10 text-center text-slate-600">
+        <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 px-5 py-10 text-center text-slate-600">
           Loading today&apos;s workout...
         </div>
       ) : null}

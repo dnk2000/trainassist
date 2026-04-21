@@ -45,7 +45,7 @@ function WeightChart({ points }) {
   const delta = lastPoint.weight - firstPoint.weight;
 
   return (
-    <section className="mb-5 rounded-3xl border border-slate-200 bg-white/85 p-5">
+    <section className="mb-5 rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-700">
@@ -62,7 +62,7 @@ function WeightChart({ points }) {
         </div>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-50/90 p-3">
+      <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 p-3">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label="Weight chart">
           <line
             x1={padding.left}

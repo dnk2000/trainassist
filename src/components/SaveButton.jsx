@@ -19,8 +19,8 @@ function SaveButton({
 }) {
   return (
     <div className="mt-4">
-      <div className="glass-panel w-full rounded-[2rem] border border-slate-200 p-3 shadow-2xl shadow-slate-300/40">
-        <div className="mb-3 flex items-center justify-between gap-3 rounded-[1.4rem] border border-slate-200 bg-white/75 px-4 py-3">
+      <div className="glass-panel w-full rounded-[2rem] border border-slate-100 p-3 shadow-sm shadow-slate-200/70">
+        <div className="mb-3 flex items-center justify-between gap-3 rounded-[1.4rem] border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 px-4 py-3">
           <p className="text-sm text-slate-600">
             {selectedCount} of {totalCount} selected
           </p>
@@ -39,7 +39,7 @@ function SaveButton({
               type="date"
               value={workoutDate}
               onChange={(event) => onWorkoutDateChange(event.target.value)}
-              className="min-h-12 w-full min-w-0 rounded-[1.4rem] border border-slate-200 bg-white/90 px-3 text-base text-slate-950 outline-none transition focus:border-slate-950 sm:px-4"
+              className="min-h-12 w-full min-w-0 rounded-[1.4rem] border border-slate-200 bg-white px-3 text-base text-slate-950 outline-none transition focus:border-slate-950 sm:px-4"
             />
           </label>
           <label className="block min-w-0">
@@ -53,7 +53,7 @@ function SaveButton({
                 value={weight}
                 onChange={(event) => onWeightChange(event.target.value)}
                 placeholder="Weight"
-                className="min-h-12 w-full min-w-0 rounded-[1.4rem] border border-slate-200 bg-white/90 px-3 pr-10 text-base text-slate-950 outline-none transition focus:border-slate-950 sm:px-4 sm:pr-14"
+                className="min-h-12 w-full min-w-0 rounded-[1.4rem] border border-slate-200 bg-white px-3 pr-10 text-base text-slate-950 outline-none transition focus:border-slate-950 sm:px-4 sm:pr-14"
               />
               <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500 sm:right-4">
                 kg
@@ -68,7 +68,7 @@ function SaveButton({
             onChange={(event) => onCommentChange(event.target.value)}
             placeholder="Optional note about today’s workout"
             rows={3}
-            className="min-h-24 w-full resize-none rounded-[1.4rem] border border-slate-200 bg-white/90 px-4 py-3 text-base text-slate-950 outline-none transition focus:border-slate-950"
+            className="min-h-24 w-full resize-none rounded-[1.4rem] border border-slate-200 bg-white px-4 py-3 text-base text-slate-950 outline-none transition focus:border-slate-950"
           />
         </label>
         <div className="mb-3">

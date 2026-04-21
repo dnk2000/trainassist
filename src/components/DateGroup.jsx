@@ -20,7 +20,7 @@ function DateGroup({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-300/30">
+    <section className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/60 p-4">
       <div className="flex items-center justify-between gap-4">
         <button
           type="button"
@@ -109,7 +109,7 @@ function DateGroup({
             {exercises.map((exercise) => (
               <li
                 key={`${date}-${exercise.id}`}
-                className="rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-800"
+                className="rounded-2xl border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 px-4 py-3 text-sm text-slate-800"
               >
                 <p>{exercise.title}</p>
                 {exercise.details ? (

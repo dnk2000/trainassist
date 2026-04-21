@@ -2,7 +2,7 @@ import ExerciseItem from './ExerciseItem';
 
 function WorkoutSection({ section, checkedIds, onToggle, onPreview }) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-300/30">
+    <section className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/60 p-4">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-slate-950">{section.name}</h3>
         {section.description ? (

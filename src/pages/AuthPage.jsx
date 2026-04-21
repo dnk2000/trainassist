@@ -120,7 +120,7 @@ function AuthPage() {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"
               required
-              className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 text-base text-slate-950 outline-none transition focus:border-slate-950"
+              className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-base text-slate-950 outline-none transition focus:border-slate-950"
             />
           </label>
 
@@ -133,7 +133,7 @@ function AuthPage() {
               placeholder="At least 6 characters"
               minLength={6}
               required
-              className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 text-base text-slate-950 outline-none transition focus:border-slate-950"
+              className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-base text-slate-950 outline-none transition focus:border-slate-950"
             />
           </label>
 

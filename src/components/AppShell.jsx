@@ -12,7 +12,7 @@ function AppShell() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/90 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2 shadow-2xl shadow-slate-300/50 backdrop-blur-xl">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/90 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2 shadow-sm shadow-slate-200/70 backdrop-blur-xl">
         <div className="mx-auto grid max-w-3xl grid-cols-4 gap-1">
           <NavLink to="/" end className={navLinkClass}>
             <svg

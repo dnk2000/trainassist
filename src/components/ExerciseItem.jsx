@@ -26,10 +26,15 @@ function ExerciseItem({ exercise, checked, onToggle, onPreview }) {
     onToggle(exercise.id);
   }
 
+  function handleCardClick(event) {
+    onToggle(exercise.id);
+    event.currentTarget.blur();
+  }
+
   return (
     <li
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/90 shadow-lg shadow-slate-300/30 transition hover:border-slate-300 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-950/20"
-      onClick={() => onToggle(exercise.id)}
+      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-100 bg-white/80 shadow-sm shadow-slate-200/50 transition hover:border-slate-300 hover:bg-slate-100 focus:outline-none"
+      onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       role="checkbox"
       aria-checked={checked}
@@ -86,7 +91,7 @@ function ExerciseItem({ exercise, checked, onToggle, onPreview }) {
               type="button"
               onClick={handlePreviewClick}
               disabled={!hasVideo}
-              className="flex h-16 w-20 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white/90 text-slate-600 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-950/20 disabled:cursor-default disabled:hover:opacity-100"
+              className="flex h-16 w-20 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white text-slate-600 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-slate-950/20 disabled:cursor-default disabled:hover:opacity-100"
               aria-label={hasVideo ? `Open video for ${exercise.title}` : undefined}
             >
               {thumbnailUrl ? (
