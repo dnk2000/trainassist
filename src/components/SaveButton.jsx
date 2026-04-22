@@ -32,7 +32,7 @@ function SaveButton({
             {allSelected ? 'Clear all' : 'Select all'}
           </button>
         </div>
-        <div className="mb-3 grid grid-cols-2 gap-3">
+        <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="block min-w-0">
             <span className="mb-2 block text-sm font-medium text-slate-700">Workout date</span>
             <input
