@@ -26,8 +26,18 @@ body {
 button,
 a,
 input,
-label {
+label,
+select,
+textarea {
   -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 button:not(:disabled),
