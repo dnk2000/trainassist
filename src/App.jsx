@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import HomePage from './pages/HomePage';
 import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
+import TrainingSetupPage from './pages/TrainingSetupPage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           >
             <Route index element={<DashboardPage />} />
             <Route path="workout" element={<HomePage />} />
+            <Route path="setup" element={<TrainingSetupPage />} />
             <Route path="history" element={<HistoryPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>

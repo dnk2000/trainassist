@@ -11,6 +11,7 @@ import {
   uploadWorkoutImages,
 } from '../services/api';
 import { formatWorkoutDate, getTodayDateString, humanizeDayName } from '../utils/date';
+import { readExerciseSettings } from '../utils/exerciseSettings';
 import {
   attachExerciseLibrary,
   getScheduledWorkoutCode,
@@ -55,7 +56,10 @@ function readWorkoutFormDraft(userId) {
 }
 
 function HomePage() {
+  const { user } = useAuth();
+  const { showToast } = useToast();
   const [exerciseLibrary, setExerciseLibrary] = useState([]);
+  const [exerciseSettings, setExerciseSettings] = useState(() => readExerciseSettings(user.id));
   const [checkedIds, setCheckedIds] = useState([]);
   const [workoutDate, setWorkoutDate] = useState(() => getTodayDateString());
   const [latestWeightDefault, setLatestWeightDefault] = useState('');
@@ -68,8 +72,6 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const { user } = useAuth();
-  const { showToast } = useToast();
   const hasHydratedFormDraftRef = useRef(false);
   const skipNextFormDraftPersistRef = useRef(false);
   const hasHydratedCheckedDraftRef = useRef(false);
@@ -88,6 +90,7 @@ function HomePage() {
 
         if (active) {
           setExerciseLibrary(libraryData);
+          setExerciseSettings(readExerciseSettings(user.id));
           if (formDraft?.workoutDate) {
             setWorkoutDate(formDraft.workoutDate);
             setSelectedWorkoutCode(getScheduledWorkoutCode(parseLocalDate(formDraft.workoutDate)));
@@ -151,8 +154,9 @@ function HomePage() {
       attachExerciseLibrary(
         getWorkoutByCode(selectedWorkoutCode, parseLocalDate(workoutDate)),
         exerciseLibrary,
+        exerciseSettings,
       ),
-    [exerciseLibrary, selectedWorkoutCode, workoutDate],
+    [exerciseLibrary, exerciseSettings, selectedWorkoutCode, workoutDate],
   );
   const selectedSet = useMemo(() => new Set(checkedIds), [checkedIds]);
   const workoutItems = useMemo(

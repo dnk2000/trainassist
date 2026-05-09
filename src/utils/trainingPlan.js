@@ -1,7 +1,8 @@
 import rawTrainingPlan from '../../training-plan.json';
+import { hasExerciseSettingValue, normalizeExerciseKey } from './exerciseSettings';
 
 function normalizeKey(value) {
-  return value.trim().toLowerCase();
+  return normalizeExerciseKey(value);
 }
 
 function humanize(value) {
@@ -44,6 +45,69 @@ function formatExerciseDetails(exercise) {
   ]);
 }
 
+function getExerciseParameters(exercise) {
+  return {
+    sets: exercise.sets ? String(exercise.sets) : '',
+    reps: exercise.reps ? String(exercise.reps) : '',
+    repsMin: exercise.reps_min ? String(exercise.reps_min) : '',
+    repsMax: exercise.reps_max ? String(exercise.reps_max) : '',
+    repsPerSide: exercise.reps_per_side ? String(exercise.reps_per_side) : '',
+    durationSeconds: exercise.duration_seconds ? String(exercise.duration_seconds) : '',
+    durationSecondsMin: exercise.duration_seconds_min
+      ? String(exercise.duration_seconds_min)
+      : '',
+    durationSecondsMax: exercise.duration_seconds_max
+      ? String(exercise.duration_seconds_max)
+      : '',
+    repsRule: exercise.reps_rule ?? '',
+    youtubeUrl: '',
+    notes: '',
+  };
+}
+
+function mergeExerciseParameters(currentParameters = {}, nextParameters = {}) {
+  return Object.entries(nextParameters).reduce(
+    (mergedParameters, [field, value]) => ({
+      ...mergedParameters,
+      [field]: mergedParameters[field] || value,
+    }),
+    { ...currentParameters },
+  );
+}
+
+function buildExerciseDetailsFromSettings(settings) {
+  return joinParts([
+    settings.sets ? `${settings.sets} set${settings.sets === '1' ? '' : 's'}` : null,
+    settings.reps ? `${settings.reps} reps` : null,
+    settings.repsMin && settings.repsMax ? `${settings.repsMin}-${settings.repsMax} reps` : null,
+    settings.repsMin && !settings.repsMax ? `${settings.repsMin}+ reps` : null,
+    settings.repsPerSide ? `${settings.repsPerSide}/side` : null,
+    settings.durationSeconds ? `${settings.durationSeconds} sec` : null,
+    settings.durationSecondsMin && settings.durationSecondsMax
+      ? `${settings.durationSecondsMin}-${settings.durationSecondsMax} sec`
+      : null,
+    settings.durationSecondsMin && !settings.durationSecondsMax
+      ? `${settings.durationSecondsMin}+ sec`
+      : null,
+    settings.repsRule ? humanize(settings.repsRule) : null,
+    settings.notes ? settings.notes : null,
+  ]);
+}
+
+function buildExerciseItem({ exercise, id, sortOrder }) {
+  const parameters = getExerciseParameters(exercise);
+
+  return {
+    id,
+    title: exercise.exercise,
+    details: formatExerciseDetails(exercise),
+    defaultDetails: formatExerciseDetails(exercise),
+    parameters,
+    normalizedTitle: normalizeKey(exercise.exercise),
+    sortOrder,
+  };
+}
+
 function buildSharedWarmupSection(plan) {
   const warmup = plan.shared_warmup;
 
@@ -54,13 +118,13 @@ function buildSharedWarmupSection(plan) {
       warmup.estimated_duration_min ? `${warmup.estimated_duration_min} min` : null,
       'Start here',
     ]),
-    items: warmup.exercises.map((exercise, index) => ({
-      id: `shared-warmup-${index}-${normalizeKey(exercise.exercise)}`,
-      title: exercise.exercise,
-      details: formatExerciseDetails(exercise),
-      normalizedTitle: normalizeKey(exercise.exercise),
-      sortOrder: index,
-    })),
+    items: warmup.exercises.map((exercise, index) =>
+      buildExerciseItem({
+        exercise,
+        id: `shared-warmup-${index}-${normalizeKey(exercise.exercise)}`,
+        sortOrder: index,
+      }),
+    ),
   };
 }
 
@@ -87,13 +151,13 @@ function buildSection(plan, section, startIndex) {
         section.duration_max ? `up to ${section.duration_max} min` : null,
         formatRounds(section),
       ]),
-      items: section.exercises.map((exercise, index) => ({
-        id: `${section.section_name}-${index}-${normalizeKey(exercise.exercise)}`,
-        title: exercise.exercise,
-        details: formatExerciseDetails(exercise),
-        normalizedTitle: normalizeKey(exercise.exercise),
-        sortOrder: startIndex + index,
-      })),
+      items: section.exercises.map((exercise, index) =>
+        buildExerciseItem({
+          exercise,
+          id: `${section.section_name}-${index}-${normalizeKey(exercise.exercise)}`,
+          sortOrder: startIndex + index,
+        }),
+      ),
     };
   }
 
@@ -238,7 +302,48 @@ export function getWorkoutTabs() {
   return tabs;
 }
 
-export function attachExerciseLibrary(workout, exerciseLibrary) {
+export function getConfigurableExercises() {
+  const plan = getTrainingPlan();
+  const exercisesByKey = new Map();
+
+  function addExercise(exercise, workoutName) {
+    const key = normalizeKey(exercise.exercise);
+    const existingExercise = exercisesByKey.get(key);
+    const parameters = getExerciseParameters(exercise);
+
+    exercisesByKey.set(key, {
+      key,
+      title: exercise.exercise,
+      parameters: mergeExerciseParameters(existingExercise?.parameters, parameters),
+      workoutNames: Array.from(
+        new Set([...(existingExercise?.workoutNames ?? []), workoutName].filter(Boolean)),
+      ),
+    });
+  }
+
+  plan.shared_warmup.exercises.forEach((exercise) => addExercise(exercise, plan.shared_warmup.name));
+
+  Object.values(plan.workouts).forEach((workout) => {
+    workout.sections?.forEach((section) => {
+      section.exercises?.forEach((exercise) => addExercise(exercise, workout.name));
+      section.exercise_options?.forEach((exerciseTitle) =>
+        addExercise(
+          {
+            exercise: exerciseTitle,
+            duration_seconds: section.work_seconds,
+          },
+          workout.name,
+        ),
+      );
+    });
+  });
+
+  return Array.from(exercisesByKey.values()).sort((left, right) =>
+    left.title.localeCompare(right.title),
+  );
+}
+
+export function attachExerciseLibrary(workout, exerciseLibrary, exerciseSettings = {}) {
   if (!workout) {
     return null;
   }
@@ -258,11 +363,20 @@ export function attachExerciseLibrary(workout, exerciseLibrary) {
             ?.map((title) => libraryMap.get(normalizeKey(title)))
             .find(Boolean) ?? null;
         const libraryEntry = directMatch ?? fallbackMatch;
+        const settings = exerciseSettings[item.normalizedTitle] ?? {};
+        const overrideDetails = hasExerciseSettingValue(settings)
+          ? buildExerciseDetailsFromSettings({
+              ...(item.parameters ?? {}),
+              ...settings,
+            })
+          : '';
+        const overrideYoutubeUrl = settings.youtubeUrl?.trim();
 
         return {
           ...item,
+          details: overrideDetails || item.details,
           exerciseId: libraryEntry?.id ?? null,
-          youtube_url: libraryEntry?.youtube_url ?? null,
+          youtube_url: overrideYoutubeUrl || (libraryEntry?.youtube_url ?? null),
         };
       }),
     })),

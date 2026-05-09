@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { updateUserPassword, updateUserProfile } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -139,6 +139,19 @@ function ProfilePage() {
           {savingProfile ? 'Saving...' : 'Save profile'}
         </button>
       </form>
+
+      <div className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5">
+        <h3 className="text-lg font-semibold text-slate-950">Training</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Adjust exercise reps, seconds, rules, notes, and video links.
+        </p>
+        <Link
+          to="/setup"
+          className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-slate-200 px-4 text-base font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100/80 sm:w-auto"
+        >
+          Training setup
+        </Link>
+      </div>
 
       <form
         className="rounded-3xl border border-slate-100 bg-white shadow-sm shadow-slate-200/70 p-5"
