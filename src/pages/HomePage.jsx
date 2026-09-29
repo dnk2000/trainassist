@@ -278,7 +278,7 @@ function HomePage() {
     setBrokenArmMode(nextMode);
     setSelectedExercise(null);
     writeInjurySettings(user.id, { brokenRightWristMode: nextMode });
-    showToast(`Broken right wrist mode ${nextMode ? 'enabled' : 'disabled'}.`, 'success');
+    showToast(`Broken wrist mode ${nextMode ? 'enabled' : 'disabled'}.`, 'success');
   }
 
   function handleImageChange(event) {
@@ -408,19 +408,19 @@ function HomePage() {
               Injury protection
             </p>
             <h3 className="mt-1 text-lg font-semibold text-slate-950">
-              {brokenArmModeConfig?.label ?? 'Broken right wrist'}
+              {brokenArmModeConfig?.label ?? 'Broken wrist'}
             </h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {brokenArmMode
-                ? 'Only no-grip, no-wrist-load exercises are shown.'
-                : 'Turn on to replace this workout with wrist-protective exercises.'}
-            </p>
+            {!brokenArmMode ? (
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Turn on to replace this workout with wrist-protective exercises.
+              </p>
+            ) : null}
           </div>
           <button
             type="button"
             role="switch"
             aria-checked={brokenArmMode}
-            aria-label="Broken right wrist mode"
+            aria-label="Broken wrist mode"
             onClick={handleBrokenArmModeChange}
             className={`relative mt-1 h-8 w-14 shrink-0 rounded-full transition ${
               brokenArmMode ? 'bg-amber-500' : 'bg-slate-300'
@@ -433,13 +433,6 @@ function HomePage() {
             />
           </button>
         </div>
-
-        {brokenArmMode ? (
-          <div className="mt-4 rounded-2xl border border-amber-200 bg-white/70 px-4 py-3 text-sm leading-5 text-amber-950">
-            <p>{brokenArmModeConfig?.notice}</p>
-            <p className="mt-2 font-medium">{brokenArmModeConfig?.stop_rule}</p>
-          </div>
-        ) : null}
       </section>
 
       <section className="mb-5">

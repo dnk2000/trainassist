@@ -62,7 +62,7 @@
     },
     "injury_modes": {
       "broken_right_wrist": {
-        "label": "Broken right wrist",
+        "label": "Broken wrist",
         "notice": "Use this conservative plan only if your clinician has cleared you for general exercise. Keep the injured wrist protected and supported, with no gripping or weight through that hand. Skip floor exercises if you cannot get down and up without using it.",
         "stop_rule": "Stop if an exercise increases pain, swelling, numbness, tingling, or changes finger colour."
       }
