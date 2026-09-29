@@ -5,6 +5,49 @@ const rootDir = process.cwd();
 const inputPath = path.join(rootDir, 'training-plan.json');
 const outputPath = path.join(rootDir, 'supabase', 'training-plan-seed.sql');
 
+function assertExerciseSafetyFlags(plan) {
+  const missingFlags = [];
+
+  function checkExercise(exercise, location) {
+    if (typeof exercise?.safe_with_broken_arm !== 'boolean') {
+      missingFlags.push(`${location}: ${exercise?.exercise ?? 'unnamed exercise'}`);
+    }
+  }
+
+  for (const exercise of plan.program_rules?.workday_break_rule?.routine ?? []) {
+    checkExercise(exercise, 'workday break');
+  }
+
+  for (const exercise of plan.shared_warmup?.exercises ?? []) {
+    checkExercise(exercise, 'shared warm-up');
+  }
+
+  for (const [workoutCode, workout] of Object.entries(plan.workouts ?? {})) {
+    for (const section of workout.sections ?? []) {
+      for (const exercise of section.exercises ?? []) {
+        checkExercise(exercise, `${workoutCode}/${section.section_name}`);
+      }
+
+      for (const exercise of section.exercise_options ?? []) {
+        checkExercise(exercise, `${workoutCode}/${section.section_name}`);
+      }
+
+      if (
+        (section.target_steps_min || section.target_steps_max) &&
+        typeof section.safe_with_broken_arm !== 'boolean'
+      ) {
+        missingFlags.push(`${workoutCode}/${section.section_name}: Walking`);
+      }
+    }
+  }
+
+  if (missingFlags.length) {
+    throw new Error(
+      `Every exercise must define safe_with_broken_arm. Missing:\n${missingFlags.join('\n')}`,
+    );
+  }
+}
+
 function collectExercises(plan) {
   const names = new Set();
 
@@ -20,7 +63,7 @@ function collectExercises(plan) {
 
       if (Array.isArray(section.exercise_options)) {
         for (const option of section.exercise_options) {
-          names.add(option);
+          names.add(typeof option === 'string' ? option : option.exercise);
         }
       }
 
@@ -44,6 +87,7 @@ function escapeSql(value) {
 async function main() {
   const rawPlan = await fs.readFile(inputPath, 'utf8');
   const plan = JSON.parse(rawPlan);
+  assertExerciseSafetyFlags(plan);
   const exercises = collectExercises(plan);
 
   const sql = `-- Generated from training-plan.json

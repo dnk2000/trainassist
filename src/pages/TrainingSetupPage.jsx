@@ -176,6 +176,24 @@ function TrainingSetupPage() {
                   <h3 className="text-lg font-semibold leading-tight text-slate-950">
                     {exercise.title}
                   </h3>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                        exercise.safeWithBrokenArm
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      {exercise.safeWithBrokenArm
+                        ? 'Available in wrist mode'
+                        : 'Hidden in wrist mode'}
+                    </span>
+                    {exercise.brokenArmModeOnly ? (
+                      <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
+                        Wrist mode only
+                      </span>
+                    ) : null}
+                  </div>
                   {exercise.workoutNames.length ? (
                     <p className="mt-1 text-xs text-slate-500">
                       {exercise.workoutNames.join(' · ')}

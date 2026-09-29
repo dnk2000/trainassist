@@ -42,6 +42,7 @@ function formatExerciseDetails(exercise) {
       ? `${exercise.duration_seconds_min}+ sec`
       : null,
     exercise.reps_rule ? humanize(exercise.reps_rule) : null,
+    exercise.notes ?? null,
   ]);
 }
 
@@ -61,7 +62,7 @@ function getExerciseParameters(exercise) {
       : '',
     repsRule: exercise.reps_rule ?? '',
     youtubeUrl: '',
-    notes: '',
+    notes: exercise.notes ?? '',
   };
 }
 
@@ -105,11 +106,28 @@ function buildExerciseItem({ exercise, id, sortOrder }) {
     parameters,
     normalizedTitle: normalizeKey(exercise.exercise),
     sortOrder,
+    safeWithBrokenArm: exercise.safe_with_broken_arm === true,
+    brokenArmModeOnly: exercise.broken_arm_mode_only === true,
   };
 }
 
-function buildSharedWarmupSection(plan) {
+function shouldIncludeExercise(exercise, brokenArmMode) {
+  if (brokenArmMode) {
+    return exercise.safe_with_broken_arm === true;
+  }
+
+  return exercise.broken_arm_mode_only !== true;
+}
+
+function normalizeExerciseOption(option) {
+  return typeof option === 'string' ? { exercise: option } : option;
+}
+
+function buildSharedWarmupSection(plan, brokenArmMode) {
   const warmup = plan.shared_warmup;
+  const exercises = warmup.exercises.filter((exercise) =>
+    shouldIncludeExercise(exercise, brokenArmMode),
+  );
 
   return {
     id: 'shared-warmup',
@@ -118,7 +136,7 @@ function buildSharedWarmupSection(plan) {
       warmup.estimated_duration_min ? `${warmup.estimated_duration_min} min` : null,
       'Start here',
     ]),
-    items: warmup.exercises.map((exercise, index) =>
+    items: exercises.map((exercise, index) =>
       buildExerciseItem({
         exercise,
         id: `shared-warmup-${index}-${normalizeKey(exercise.exercise)}`,
@@ -128,9 +146,9 @@ function buildSharedWarmupSection(plan) {
   };
 }
 
-function buildSection(plan, section, startIndex) {
+function buildSection(plan, section, startIndex, brokenArmMode) {
   if (section.use_shared_warmup) {
-    const warmupSection = buildSharedWarmupSection(plan);
+    const warmupSection = buildSharedWarmupSection(plan, brokenArmMode);
 
     return {
       ...warmupSection,
@@ -142,6 +160,10 @@ function buildSection(plan, section, startIndex) {
   }
 
   if (Array.isArray(section.exercises)) {
+    const exercises = section.exercises.filter((exercise) =>
+      shouldIncludeExercise(exercise, brokenArmMode),
+    );
+
     return {
       id: section.section_name,
       name: humanize(section.section_name),
@@ -151,7 +173,7 @@ function buildSection(plan, section, startIndex) {
         section.duration_max ? `up to ${section.duration_max} min` : null,
         formatRounds(section),
       ]),
-      items: section.exercises.map((exercise, index) =>
+      items: exercises.map((exercise, index) =>
         buildExerciseItem({
           exercise,
           id: `${section.section_name}-${index}-${normalizeKey(exercise.exercise)}`,
@@ -162,7 +184,10 @@ function buildSection(plan, section, startIndex) {
   }
 
   if (Array.isArray(section.exercise_options)) {
-    const title = section.exercise_options.join(' or ');
+    const exerciseOptions = section.exercise_options
+      .map(normalizeExerciseOption)
+      .filter((exercise) => shouldIncludeExercise(exercise, brokenArmMode));
+    const title = exerciseOptions.map((exercise) => exercise.exercise).join(' or ');
 
     return {
       id: section.section_name,
@@ -172,19 +197,22 @@ function buildSection(plan, section, startIndex) {
         section.duration_min ? `${section.duration_min} min` : null,
         section.duration_max ? `up to ${section.duration_max} min` : null,
       ]),
-      items: [
-        {
+      items: exerciseOptions.length
+        ? [{
           id: `${section.section_name}-options`,
           title,
-          optionTitles: section.exercise_options,
+          optionTitles: exerciseOptions.map((exercise) => exercise.exercise),
           details: joinParts([
             section.work_seconds ? `${section.work_seconds} sec work` : null,
             section.rest_seconds ? `${section.rest_seconds} sec rest` : null,
           ]),
           normalizedTitle: normalizeKey(title),
           sortOrder: startIndex,
-        },
-      ],
+          safeWithBrokenArm: exerciseOptions.every(
+            (exercise) => exercise.safe_with_broken_arm === true,
+          ),
+        }]
+        : [],
     };
   }
 
@@ -193,19 +221,21 @@ function buildSection(plan, section, startIndex) {
       id: section.section_name,
       name: humanize(section.section_name),
       description: section.duration_min ? `${section.duration_min} min` : null,
-      items: [
-        {
+      items: !brokenArmMode || section.safe_with_broken_arm === true
+        ? [{
           id: `${section.section_name}-walk`,
           title: 'Walking',
           details: joinParts([
             section.target_steps_min && section.target_steps_max
               ? `${section.target_steps_min}-${section.target_steps_max} steps`
               : null,
+            section.notes ?? null,
           ]),
           normalizedTitle: normalizeKey('Walking'),
           sortOrder: startIndex,
-        },
-      ],
+          safeWithBrokenArm: section.safe_with_broken_arm === true,
+        }]
+        : [],
     };
   }
 
@@ -228,7 +258,7 @@ export function getScheduledWorkoutCode(date = new Date()) {
   return scheduleEntry?.workout_type ?? null;
 }
 
-function buildWorkout(workoutCode, date = new Date()) {
+function buildWorkout(workoutCode, date = new Date(), { brokenArmMode = false } = {}) {
   const plan = getTrainingPlan();
   const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
   const workout = workoutCode ? plan.workouts[workoutCode] : null;
@@ -250,11 +280,13 @@ function buildWorkout(workoutCode, date = new Date()) {
   }
 
   let sortCursor = 0;
-  const sections = (workout.sections ?? []).map((section) => {
-    const builtSection = buildSection(plan, section, sortCursor);
-    sortCursor += builtSection.items.length || 1;
-    return builtSection;
-  });
+  const sections = (workout.sections ?? [])
+    .map((section) => {
+      const builtSection = buildSection(plan, section, sortCursor, brokenArmMode);
+      sortCursor += builtSection.items.length || 1;
+      return builtSection;
+    })
+    .filter((section) => !brokenArmMode || section.items.length > 0);
 
   return {
     dayName,
@@ -267,12 +299,12 @@ function buildWorkout(workoutCode, date = new Date()) {
   };
 }
 
-export function getWorkoutByCode(workoutCode, date = new Date()) {
-  return buildWorkout(workoutCode, date);
+export function getWorkoutByCode(workoutCode, date = new Date(), options = {}) {
+  return buildWorkout(workoutCode, date, options);
 }
 
-export function getTodayWorkout(date = new Date()) {
-  return buildWorkout(getScheduledWorkoutCode(date), date);
+export function getTodayWorkout(date = new Date(), options = {}) {
+  return buildWorkout(getScheduledWorkoutCode(date), date, options);
 }
 
 export function getWorkoutTabs() {
@@ -307,14 +339,17 @@ export function getConfigurableExercises() {
   const exercisesByKey = new Map();
 
   function addExercise(exercise, workoutName) {
-    const key = normalizeKey(exercise.exercise);
+    const normalizedExercise = normalizeExerciseOption(exercise);
+    const key = normalizeKey(normalizedExercise.exercise);
     const existingExercise = exercisesByKey.get(key);
-    const parameters = getExerciseParameters(exercise);
+    const parameters = getExerciseParameters(normalizedExercise);
 
     exercisesByKey.set(key, {
       key,
-      title: exercise.exercise,
+      title: normalizedExercise.exercise,
       parameters: mergeExerciseParameters(existingExercise?.parameters, parameters),
+      safeWithBrokenArm: normalizedExercise.safe_with_broken_arm === true,
+      brokenArmModeOnly: normalizedExercise.broken_arm_mode_only === true,
       workoutNames: Array.from(
         new Set([...(existingExercise?.workoutNames ?? []), workoutName].filter(Boolean)),
       ),
@@ -326,15 +361,27 @@ export function getConfigurableExercises() {
   Object.values(plan.workouts).forEach((workout) => {
     workout.sections?.forEach((section) => {
       section.exercises?.forEach((exercise) => addExercise(exercise, workout.name));
-      section.exercise_options?.forEach((exerciseTitle) =>
+      section.exercise_options?.forEach((exerciseOption) => {
+        const normalizedOption = normalizeExerciseOption(exerciseOption);
+
         addExercise(
           {
-            exercise: exerciseTitle,
+            ...normalizedOption,
             duration_seconds: section.work_seconds,
           },
           workout.name,
-        ),
-      );
+        );
+      });
+
+      if (section.target_steps_min || section.target_steps_max) {
+        addExercise(
+          {
+            exercise: 'Walking',
+            safe_with_broken_arm: section.safe_with_broken_arm === true,
+          },
+          workout.name,
+        );
+      }
     });
   });
 

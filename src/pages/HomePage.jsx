@@ -12,6 +12,7 @@ import {
 } from '../services/api';
 import { formatWorkoutDate, getTodayDateString, humanizeDayName } from '../utils/date';
 import { readExerciseSettings } from '../utils/exerciseSettings';
+import { readInjurySettings, writeInjurySettings } from '../utils/injurySettings';
 import {
   attachExerciseLibrary,
   getScheduledWorkoutCode,
@@ -24,12 +25,13 @@ function parseLocalDate(dateString) {
   return dateString ? new Date(`${dateString}T00:00:00`) : new Date();
 }
 
-function getWorkoutDraftStorageKey(userId, workoutCode) {
+function getWorkoutDraftStorageKey(userId, workoutCode, brokenArmMode) {
   if (!userId || !workoutCode) {
     return '';
   }
 
-  return `trainassist:workout-draft:${userId}:${workoutCode}`;
+  const baseKey = `trainassist:workout-draft:${userId}:${workoutCode}`;
+  return brokenArmMode ? `${baseKey}:broken-right-wrist` : baseKey;
 }
 
 function getWorkoutFormStorageKey(userId) {
@@ -60,6 +62,9 @@ function HomePage() {
   const { showToast } = useToast();
   const [exerciseLibrary, setExerciseLibrary] = useState([]);
   const [exerciseSettings, setExerciseSettings] = useState(() => readExerciseSettings(user.id));
+  const [brokenArmMode, setBrokenArmMode] = useState(
+    () => readInjurySettings(user.id).brokenRightWristMode,
+  );
   const [checkedIds, setCheckedIds] = useState([]);
   const [workoutDate, setWorkoutDate] = useState(() => getTodayDateString());
   const [latestWeightDefault, setLatestWeightDefault] = useState('');
@@ -91,6 +96,7 @@ function HomePage() {
         if (active) {
           setExerciseLibrary(libraryData);
           setExerciseSettings(readExerciseSettings(user.id));
+          setBrokenArmMode(readInjurySettings(user.id).brokenRightWristMode);
           if (formDraft?.workoutDate) {
             setWorkoutDate(formDraft.workoutDate);
             setSelectedWorkoutCode(getScheduledWorkoutCode(parseLocalDate(formDraft.workoutDate)));
@@ -141,6 +147,7 @@ function HomePage() {
   }, [imageFiles]);
 
   const trainingPlan = getTrainingPlan();
+  const brokenArmModeConfig = trainingPlan.injury_modes?.broken_right_wrist;
   const workoutTabs = useMemo(() => getWorkoutTabs(), []);
   const todayDate = getTodayDateString();
   const scheduledWorkoutCode = useMemo(
@@ -152,11 +159,13 @@ function HomePage() {
   const workout = useMemo(
     () =>
       attachExerciseLibrary(
-        getWorkoutByCode(selectedWorkoutCode, parseLocalDate(workoutDate)),
+        getWorkoutByCode(selectedWorkoutCode, parseLocalDate(workoutDate), {
+          brokenArmMode,
+        }),
         exerciseLibrary,
         exerciseSettings,
       ),
-    [exerciseLibrary, exerciseSettings, selectedWorkoutCode, workoutDate],
+    [brokenArmMode, exerciseLibrary, exerciseSettings, selectedWorkoutCode, workoutDate],
   );
   const selectedSet = useMemo(() => new Set(checkedIds), [checkedIds]);
   const workoutItems = useMemo(
@@ -165,8 +174,8 @@ function HomePage() {
   );
   const formDraftStorageKey = useMemo(() => getWorkoutFormStorageKey(user.id), [user.id]);
   const draftStorageKey = useMemo(
-    () => getWorkoutDraftStorageKey(user.id, selectedWorkoutCode),
-    [selectedWorkoutCode, user.id],
+    () => getWorkoutDraftStorageKey(user.id, selectedWorkoutCode, brokenArmMode),
+    [brokenArmMode, selectedWorkoutCode, user.id],
   );
   const selectedCount = checkedIds.length;
   const allSelected = workoutItems.length > 0 && checkedIds.length === workoutItems.length;
@@ -261,6 +270,15 @@ function HomePage() {
     setWorkoutDate(nextWorkoutDate);
     setSelectedWorkoutCode(getScheduledWorkoutCode(parseLocalDate(nextWorkoutDate)));
     setSelectedExercise(null);
+  }
+
+  function handleBrokenArmModeChange() {
+    const nextMode = !brokenArmMode;
+
+    setBrokenArmMode(nextMode);
+    setSelectedExercise(null);
+    writeInjurySettings(user.id, { brokenRightWristMode: nextMode });
+    showToast(`Broken right wrist mode ${nextMode ? 'enabled' : 'disabled'}.`, 'success');
   }
 
   function handleImageChange(event) {
@@ -375,6 +393,53 @@ function HomePage() {
           {workout?.workoutName ?? 'No workout scheduled'}
           {workout?.estimatedDurationMin ? ` · about ${workout.estimatedDurationMin} min` : ''}
         </p>
+      </section>
+
+      <section
+        className={`mb-5 rounded-3xl border p-4 shadow-sm ${
+          brokenArmMode
+            ? 'border-amber-300 bg-amber-50 shadow-amber-100/70'
+            : 'border-slate-100 bg-white shadow-slate-200/70'
+        }`}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Injury protection
+            </p>
+            <h3 className="mt-1 text-lg font-semibold text-slate-950">
+              {brokenArmModeConfig?.label ?? 'Broken right wrist'}
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {brokenArmMode
+                ? 'Only no-grip, no-wrist-load exercises are shown.'
+                : 'Turn on to replace this workout with wrist-protective exercises.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={brokenArmMode}
+            aria-label="Broken right wrist mode"
+            onClick={handleBrokenArmModeChange}
+            className={`relative mt-1 h-8 w-14 shrink-0 rounded-full transition ${
+              brokenArmMode ? 'bg-amber-500' : 'bg-slate-300'
+            }`}
+          >
+            <span
+              className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow-sm transition ${
+                brokenArmMode ? 'left-7' : 'left-1'
+              }`}
+            />
+          </button>
+        </div>
+
+        {brokenArmMode ? (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-white/70 px-4 py-3 text-sm leading-5 text-amber-950">
+            <p>{brokenArmModeConfig?.notice}</p>
+            <p className="mt-2 font-medium">{brokenArmModeConfig?.stop_rule}</p>
+          </div>
+        ) : null}
       </section>
 
       <section className="mb-5">

@@ -8,6 +8,7 @@ It uses your local [`training-plan.json`](training-plan.json) as the source of t
 - Mobile-first workout UI with large tap targets and sticky save action
 - Daily workout selection based on [`training-plan.json`](training-plan.json)
 - Manual workout tabs for `A`, `B`, `C`, `Light`, and `Rest`
+- Per-user broken-right-wrist mode that filters out gripping, hanging, impact, and wrist-loading exercises
 - Exercise video previews from YouTube
 - Saved workout sessions with:
   - completed items
@@ -56,6 +57,11 @@ training-plan.json
 - sections
 - exercise instructions
 - warm-up structure
+- injury-mode eligibility through `safe_with_broken_arm`
+
+Exercises marked with `broken_arm_mode_only: true` are compensatory alternatives: they are hidden
+from the standard plan and appear only when broken-right-wrist mode is enabled. The mode is stored
+locally per signed-in user and can be switched on from the workout screen.
 
 The app reads that file at build time and uses it to render the correct workout for the current day.
 

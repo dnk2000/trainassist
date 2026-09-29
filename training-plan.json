@@ -43,17 +43,28 @@
         "routine": [
           {
             "exercise": "Squats",
-            "reps": 10
+            "reps": 10,
+            "notes": "Keep the injured arm supported; do not use it for balance",
+            "safe_with_broken_arm": true
           },
           {
             "exercise": "Band Pull-Apart",
-            "reps": 10
+            "reps": 10,
+            "safe_with_broken_arm": false
           },
           {
             "exercise": "Chest Stretch",
-            "duration_seconds": 20
+            "duration_seconds": 20,
+            "safe_with_broken_arm": false
           }
         ]
+      }
+    },
+    "injury_modes": {
+      "broken_right_wrist": {
+        "label": "Broken right wrist",
+        "notice": "Use this conservative plan only if your clinician has cleared you for general exercise. Keep the injured wrist protected and supported, with no gripping or weight through that hand. Skip floor exercises if you cannot get down and up without using it.",
+        "stop_rule": "Stop if an exercise increases pain, swelling, numbness, tingling, or changes finger colour."
       }
     },
     "weekly_schedule": [
@@ -93,22 +104,50 @@
         {
           "exercise": "Cat-Cow",
           "sets": 1,
-          "reps": 10
+          "reps": 10,
+          "safe_with_broken_arm": false
         },
         {
           "exercise": "Thoracic Rotation (Open Book)",
           "sets": 1,
-          "reps_per_side": 10
+          "reps_per_side": 10,
+          "safe_with_broken_arm": false
         },
         {
           "exercise": "Chest Stretch",
           "sets": 1,
-          "duration_seconds": 60
+          "duration_seconds": 60,
+          "safe_with_broken_arm": false
         },
         {
           "exercise": "Band Pull-Apart",
           "sets": 1,
-          "reps": 20
+          "reps": 20,
+          "safe_with_broken_arm": false
+        },
+        {
+          "exercise": "Marching in Place",
+          "sets": 1,
+          "duration_seconds": 60,
+          "notes": "Low impact; keep the injured arm supported",
+          "safe_with_broken_arm": true,
+          "broken_arm_mode_only": true
+        },
+        {
+          "exercise": "Supine Pelvic Tilt",
+          "sets": 1,
+          "reps": 10,
+          "notes": "Keep both arms relaxed; do not push through the hands",
+          "safe_with_broken_arm": true,
+          "broken_arm_mode_only": true
+        },
+        {
+          "exercise": "Shoulder Blade Squeeze",
+          "sets": 1,
+          "reps": 10,
+          "notes": "Sit tall with the injured arm comfortably supported",
+          "safe_with_broken_arm": true,
+          "broken_arm_mode_only": true
         }
       ]
     },
@@ -136,21 +175,50 @@
               {
                 "exercise": "Push-Ups",
                 "reps_min": 10,
-                "reps_max": 15
+                "reps_max": 15,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Resistance Band Row",
                 "reps_min": 12,
-                "reps_max": 15
+                "reps_max": 15,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Pull-Ups",
-                "reps_rule": "max_good_form"
+                "reps_rule": "max_good_form",
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Glute Bridge",
                 "reps_min": 15,
-                "reps_max": 20
+                "reps_max": 20,
+                "notes": "Keep the injured wrist supported and do not press through that hand",
+                "safe_with_broken_arm": true
+              },
+              {
+                "exercise": "Sit-to-Stand",
+                "reps_min": 10,
+                "reps_max": 15,
+                "notes": "Use a stable chair and stand without pushing with either hand",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Wall Sit",
+                "duration_seconds_min": 20,
+                "duration_seconds_max": 40,
+                "notes": "Arms relaxed; keep the injured wrist clear of the wall",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Calf Raises",
+                "reps_min": 15,
+                "reps_max": 20,
+                "notes": "Use only the uninjured hand for light balance support if needed",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
               }
             ]
           },
@@ -164,11 +232,27 @@
               {
                 "exercise": "Plank",
                 "duration_seconds_min": 30,
-                "duration_seconds_max": 45
+                "duration_seconds_max": 45,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Dead Bug",
-                "reps_per_side": 10
+                "reps_per_side": 10,
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Dead Bug (Arms Resting)",
+                "reps_per_side": 10,
+                "notes": "Keep both arms supported on the floor; move only the legs",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Heel Slides",
+                "reps_per_side": 10,
+                "notes": "Keep both arms relaxed and the injured wrist supported",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
               }
             ]
           },
@@ -180,8 +264,19 @@
             "work_seconds": 30,
             "rest_seconds": 30,
             "exercise_options": [
-              "Mountain Climbers",
-              "Burpees"
+              {
+                "exercise": "Mountain Climbers",
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Burpees",
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Step Touch",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              }
             ]
           }
         ]
@@ -207,21 +302,48 @@
             "exercises": [
               {
                 "exercise": "Bird Dog",
-                "reps_per_side": 10
+                "reps_per_side": 10,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Prone W Raise",
-                "reps": 15
+                "reps": 15,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Scapular Pull-Ups",
                 "reps_min": 8,
-                "reps_max": 10
+                "reps_max": 10,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Squats",
                 "reps_min": 15,
-                "reps_max": 20
+                "reps_max": 20,
+                "notes": "Keep the injured arm supported; do not use it for balance",
+                "safe_with_broken_arm": true
+              },
+              {
+                "exercise": "Side-Lying Leg Raise",
+                "reps_per_side": 12,
+                "notes": "Keep the injured arm supported in a comfortable position",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Clamshell",
+                "reps_per_side": 12,
+                "notes": "Do not lean or push through the injured hand",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Calf Raises",
+                "reps_min": 15,
+                "reps_max": 20,
+                "notes": "Use only the uninjured hand for light balance support if needed",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
               }
             ]
           },
@@ -235,11 +357,28 @@
               {
                 "exercise": "Leg Raises",
                 "reps_min": 10,
-                "reps_max": 15
+                "reps_max": 15,
+                "notes": "Keep the injured wrist supported and do not press through that hand",
+                "safe_with_broken_arm": true
               },
               {
                 "exercise": "Russian Twist",
-                "reps": 20
+                "reps": 20,
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Supine March",
+                "reps_per_side": 10,
+                "notes": "Arms relaxed; lift one foot at a time without arching the back",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Heel Slides",
+                "reps_per_side": 10,
+                "notes": "Keep both arms relaxed and the injured wrist supported",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
               }
             ]
           },
@@ -251,8 +390,19 @@
             "work_seconds": 30,
             "rest_seconds": 30,
             "exercise_options": [
-              "Mountain Climbers",
-              "Burpees"
+              {
+                "exercise": "Mountain Climbers",
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Burpees",
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Step Touch",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              }
             ]
           }
         ]
@@ -279,20 +429,55 @@
             "exercises": [
               {
                 "exercise": "Jump Squats",
-                "reps": 15
+                "reps": 15,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "High Knees",
-                "duration_seconds": 30
+                "duration_seconds": 30,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Push-Ups",
                 "reps_min": 10,
-                "reps_max": 15
+                "reps_max": 15,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Plank",
-                "duration_seconds": 30
+                "duration_seconds": 30,
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Bodyweight Squats",
+                "reps_min": 12,
+                "reps_max": 15,
+                "notes": "Keep the injured arm supported; do not use it for balance",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Step Touch",
+                "duration_seconds": 30,
+                "notes": "Stay low impact and keep the injured arm still",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Sit-to-Stand",
+                "reps_min": 10,
+                "reps_max": 15,
+                "notes": "Use a stable chair and stand without pushing with either hand",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Calf Raises",
+                "reps_min": 15,
+                "reps_max": 20,
+                "notes": "Use only the uninjured hand for light balance support if needed",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
               }
             ]
           },
@@ -303,8 +488,24 @@
             "work_seconds": 30,
             "rest_seconds": 30,
             "exercise_options": [
-              "Mountain Climbers",
-              "High Knees"
+              {
+                "exercise": "Mountain Climbers",
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "High Knees",
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Marching in Place",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Step Touch",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              }
             ]
           }
         ]
@@ -316,7 +517,9 @@
           {
             "section_name": "walking",
             "target_steps_min": 8000,
-            "target_steps_max": 12000
+            "target_steps_max": 12000,
+            "notes": "Choose a level surface and skip it if your balance feels unsafe",
+            "safe_with_broken_arm": true
           },
           {
             "section_name": "mobility",
@@ -324,11 +527,34 @@
             "exercises": [
               {
                 "exercise": "Cat-Cow",
-                "reps": 10
+                "reps": 10,
+                "safe_with_broken_arm": false
               },
               {
                 "exercise": "Thoracic Rotation (Open Book)",
-                "reps_per_side": 10
+                "reps_per_side": 10,
+                "safe_with_broken_arm": false
+              },
+              {
+                "exercise": "Supine Pelvic Tilt",
+                "reps": 10,
+                "notes": "Keep both arms relaxed; do not push through the hands",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Heel Slides",
+                "reps_per_side": 10,
+                "notes": "Keep both arms relaxed and the injured wrist supported",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
+              },
+              {
+                "exercise": "Clamshell",
+                "reps_per_side": 12,
+                "notes": "Do not lean or push through the injured hand",
+                "safe_with_broken_arm": true,
+                "broken_arm_mode_only": true
               }
             ]
           }

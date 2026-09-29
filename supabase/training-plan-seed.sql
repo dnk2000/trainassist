@@ -18,7 +18,15 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Burpees', null, 3, true
+select 'Bodyweight Squats', null, 3, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Bodyweight Squats')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Burpees', null, 4, true
 where not exists (
   select 1
   from public.exercises
@@ -26,7 +34,15 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Cat-Cow', null, 4, true
+select 'Calf Raises', null, 5, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Calf Raises')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Cat-Cow', null, 6, true
 where not exists (
   select 1
   from public.exercises
@@ -34,7 +50,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Chest Stretch', null, 5, true
+select 'Chest Stretch', null, 7, true
 where not exists (
   select 1
   from public.exercises
@@ -42,7 +58,15 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Dead Bug', null, 6, true
+select 'Clamshell', null, 8, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Clamshell')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Dead Bug', null, 9, true
 where not exists (
   select 1
   from public.exercises
@@ -50,7 +74,15 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Glute Bridge', null, 7, true
+select 'Dead Bug (Arms Resting)', null, 10, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Dead Bug (Arms Resting)')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Glute Bridge', null, 11, true
 where not exists (
   select 1
   from public.exercises
@@ -58,7 +90,15 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'High Knees', null, 8, true
+select 'Heel Slides', null, 12, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Heel Slides')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'High Knees', null, 13, true
 where not exists (
   select 1
   from public.exercises
@@ -66,7 +106,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Jump Squats', null, 9, true
+select 'Jump Squats', null, 14, true
 where not exists (
   select 1
   from public.exercises
@@ -74,7 +114,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Leg Raises', null, 10, true
+select 'Leg Raises', null, 15, true
 where not exists (
   select 1
   from public.exercises
@@ -82,7 +122,15 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Mountain Climbers', null, 11, true
+select 'Marching in Place', null, 16, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Marching in Place')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Mountain Climbers', null, 17, true
 where not exists (
   select 1
   from public.exercises
@@ -90,7 +138,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Plank', null, 12, true
+select 'Plank', null, 18, true
 where not exists (
   select 1
   from public.exercises
@@ -98,7 +146,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Prone W Raise', null, 13, true
+select 'Prone W Raise', null, 19, true
 where not exists (
   select 1
   from public.exercises
@@ -106,7 +154,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Pull-Ups', null, 14, true
+select 'Pull-Ups', null, 20, true
 where not exists (
   select 1
   from public.exercises
@@ -114,7 +162,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Push-Ups', null, 15, true
+select 'Push-Ups', null, 21, true
 where not exists (
   select 1
   from public.exercises
@@ -122,7 +170,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Resistance Band Row', null, 16, true
+select 'Resistance Band Row', null, 22, true
 where not exists (
   select 1
   from public.exercises
@@ -130,7 +178,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Russian Twist', null, 17, true
+select 'Russian Twist', null, 23, true
 where not exists (
   select 1
   from public.exercises
@@ -138,7 +186,7 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Scapular Pull-Ups', null, 18, true
+select 'Scapular Pull-Ups', null, 24, true
 where not exists (
   select 1
   from public.exercises
@@ -146,7 +194,31 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Squats', null, 19, true
+select 'Shoulder Blade Squeeze', null, 25, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Shoulder Blade Squeeze')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Side-Lying Leg Raise', null, 26, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Side-Lying Leg Raise')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Sit-to-Stand', null, 27, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Sit-to-Stand')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Squats', null, 28, true
 where not exists (
   select 1
   from public.exercises
@@ -154,7 +226,31 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Thoracic Rotation (Open Book)', null, 20, true
+select 'Step Touch', null, 29, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Step Touch')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Supine March', null, 30, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Supine March')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Supine Pelvic Tilt', null, 31, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Supine Pelvic Tilt')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Thoracic Rotation (Open Book)', null, 32, true
 where not exists (
   select 1
   from public.exercises
@@ -162,9 +258,17 @@ where not exists (
 );
 
 insert into public.exercises (title, youtube_url, sort_order, is_active)
-select 'Walking', null, 21, true
+select 'Walking', null, 33, true
 where not exists (
   select 1
   from public.exercises
   where lower(title) = lower('Walking')
+);
+
+insert into public.exercises (title, youtube_url, sort_order, is_active)
+select 'Wall Sit', null, 34, true
+where not exists (
+  select 1
+  from public.exercises
+  where lower(title) = lower('Wall Sit')
 );
